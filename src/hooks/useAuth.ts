@@ -60,7 +60,16 @@ export function useAuth() {
     return { error };
   };
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (
+    email: string, 
+    password: string, 
+    metadata?: { 
+      display_name?: string; 
+      phone?: string; 
+      state?: string; 
+      city?: string; 
+    }
+  ) => {
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
@@ -68,6 +77,7 @@ export function useAuth() {
       password,
       options: {
         emailRedirectTo: redirectUrl,
+        data: metadata,
       },
     });
     return { error };
