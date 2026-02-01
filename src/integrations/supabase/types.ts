@@ -423,6 +423,10 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      toggle_upvote: {
+        Args: { p_answer_id: string; p_voter_fingerprint: string }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "user"

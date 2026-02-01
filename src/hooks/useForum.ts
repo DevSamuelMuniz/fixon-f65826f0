@@ -115,37 +115,22 @@ export function useCreateAnswer() {
   });
 }
 
-// Toggle upvote
+// Toggle upvote using secure database function
 export function useToggleUpvote() {
   const queryClient = useQueryClient();
   const fingerprint = getFingerprint();
   
   return useMutation({
     mutationFn: async ({ answerId, questionId }: { answerId: string; questionId: string }) => {
-      // Check if already upvoted
-      const { data: existing } = await supabase
-        .from('forum_upvotes')
-        .select('id')
-        .eq('answer_id', answerId)
-        .eq('voter_fingerprint', fingerprint)
-        .maybeSingle();
+      // Use secure RPC function that handles ownership validation
+      const { data, error } = await supabase
+        .rpc('toggle_upvote', {
+          p_answer_id: answerId,
+          p_voter_fingerprint: fingerprint
+        });
       
-      if (existing) {
-        // Remove upvote
-        const { error } = await supabase
-          .from('forum_upvotes')
-          .delete()
-          .eq('id', existing.id);
-        if (error) throw error;
-        return { action: 'removed' };
-      } else {
-        // Add upvote
-        const { error } = await supabase
-          .from('forum_upvotes')
-          .insert({ answer_id: answerId, voter_fingerprint: fingerprint });
-        if (error) throw error;
-        return { action: 'added' };
-      }
+      if (error) throw error;
+      return data as { action: string; success: boolean };
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['forum-question', variables.questionId] });
