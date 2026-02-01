@@ -22,14 +22,14 @@ const questionSchema = z.object({
 });
 
 const TAGS = [
-  'urgente',
-  'iniciante',
-  'avançado',
-  'dica',
-  'erro',
-  'configuração',
-  'instalação',
-  'atualização',
+  { value: 'urgente', label: 'Urgente' },
+  { value: 'iniciante', label: 'Iniciante' },
+  { value: 'avancado', label: 'Avançado' },
+  { value: 'dica', label: 'Dica' },
+  { value: 'erro', label: 'Erro' },
+  { value: 'configuracao', label: 'Configuração' },
+  { value: 'instalacao', label: 'Instalação' },
+  { value: 'atualizacao', label: 'Atualização' },
 ];
 
 export default function NewQuestionPage() {
@@ -66,11 +66,18 @@ export default function NewQuestionPage() {
     }
     
     try {
+      // Find category ID from slug
+      const categoryId = selectedCategory 
+        ? categories?.find(c => c.id === selectedCategory)?.id 
+        : undefined;
+      
       const question = await createQuestion.mutateAsync({
         title: formData.title,
         description: formData.description,
         author_name: formData.author_name || undefined,
         author_email: formData.author_email || undefined,
+        category_id: categoryId,
+        tags: selectedTag ? [selectedTag] : [],
       });
       
       toast({
@@ -149,7 +156,7 @@ export default function NewQuestionPage() {
               <div className="space-y-2">
                 <Label htmlFor="category" className="flex items-center gap-2">
                   <FolderOpen className="h-4 w-4" />
-                  Categoria (filtro)
+                  Categoria
                 </Label>
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                   <SelectTrigger>
@@ -157,7 +164,7 @@ export default function NewQuestionPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {categories?.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.slug}>
+                      <SelectItem key={cat.id} value={cat.id}>
                         {cat.name}
                       </SelectItem>
                     ))}
@@ -169,7 +176,7 @@ export default function NewQuestionPage() {
               <div className="space-y-2">
                 <Label htmlFor="tag" className="flex items-center gap-2">
                   <Tag className="h-4 w-4" />
-                  Tag (filtro)
+                  Tag
                 </Label>
                 <Select value={selectedTag} onValueChange={setSelectedTag}>
                   <SelectTrigger>
@@ -177,8 +184,8 @@ export default function NewQuestionPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {TAGS.map((tag) => (
-                      <SelectItem key={tag} value={tag}>
-                        {tag.charAt(0).toUpperCase() + tag.slice(1)}
+                      <SelectItem key={tag.value} value={tag.value}>
+                        {tag.label}
                       </SelectItem>
                     ))}
                   </SelectContent>

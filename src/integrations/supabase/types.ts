@@ -103,6 +103,7 @@ export type Database = {
           answer_count: number
           author_email: string | null
           author_name: string | null
+          category_id: string | null
           converted_problem_id: string | null
           created_at: string
           description: string
@@ -110,6 +111,7 @@ export type Database = {
           niche: string | null
           resolved_at: string | null
           status: string
+          tags: string[] | null
           title: string
           updated_at: string
         }
@@ -117,6 +119,7 @@ export type Database = {
           answer_count?: number
           author_email?: string | null
           author_name?: string | null
+          category_id?: string | null
           converted_problem_id?: string | null
           created_at?: string
           description: string
@@ -124,6 +127,7 @@ export type Database = {
           niche?: string | null
           resolved_at?: string | null
           status?: string
+          tags?: string[] | null
           title: string
           updated_at?: string
         }
@@ -131,6 +135,7 @@ export type Database = {
           answer_count?: number
           author_email?: string | null
           author_name?: string | null
+          category_id?: string | null
           converted_problem_id?: string | null
           created_at?: string
           description?: string
@@ -138,10 +143,18 @@ export type Database = {
           niche?: string | null
           resolved_at?: string | null
           status?: string
+          tags?: string[] | null
           title?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "forum_questions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "forum_questions_converted_problem_id_fkey"
             columns: ["converted_problem_id"]

@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   ArrowLeft, MessageCircle, Clock, ThumbsUp, 
-  CheckCircle2, Send, FileText, HelpCircle, Sparkles
+  CheckCircle2, Send, FileText, HelpCircle, Sparkles, Tag, FolderOpen
 } from 'lucide-react';
 import { z } from 'zod';
 import { Layout } from '@/components/layout/Layout';
@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/EmptyState';
 import { UserAvatar } from '@/components/UserAvatar';
 import { useToast } from '@/hooks/use-toast';
@@ -45,6 +46,21 @@ const statusConfig = {
   resolved: { label: 'Resolvida', color: 'bg-green-500/10 text-green-500 border-green-500/20', icon: CheckCircle2 },
   converted: { label: 'Artigo criado', color: 'bg-purple-500/10 text-purple-500 border-purple-500/20', icon: FileText },
 };
+
+const TAG_CONFIG: Record<string, { label: string; color: string }> = {
+  urgente: { label: 'Urgente', color: 'bg-red-500/10 text-red-500 border-red-500/30' },
+  iniciante: { label: 'Iniciante', color: 'bg-green-500/10 text-green-500 border-green-500/30' },
+  avancado: { label: 'Avançado', color: 'bg-purple-500/10 text-purple-500 border-purple-500/30' },
+  dica: { label: 'Dica', color: 'bg-amber-500/10 text-amber-500 border-amber-500/30' },
+  erro: { label: 'Erro', color: 'bg-orange-500/10 text-orange-500 border-orange-500/30' },
+  configuracao: { label: 'Configuração', color: 'bg-blue-500/10 text-blue-500 border-blue-500/30' },
+  instalacao: { label: 'Instalação', color: 'bg-cyan-500/10 text-cyan-500 border-cyan-500/30' },
+  atualizacao: { label: 'Atualização', color: 'bg-indigo-500/10 text-indigo-500 border-indigo-500/30' },
+};
+
+function getTagConfig(tag: string) {
+  return TAG_CONFIG[tag] || { label: tag, color: 'bg-muted text-muted-foreground border-border' };
+}
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('pt-BR', { 
@@ -242,6 +258,31 @@ export default function QuestionDetailPage() {
               {question.description}
             </p>
           </div>
+
+          {/* Category & Tags */}
+          {(question.category || (question.tags && question.tags.length > 0)) && (
+            <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-border">
+              {question.category && (
+                <Badge variant="outline" className="gap-1 bg-primary/5 border-primary/20 text-primary">
+                  <FolderOpen className="h-3 w-3" />
+                  {question.category.name}
+                </Badge>
+              )}
+              {question.tags?.map((tag) => {
+                const tagConfig = getTagConfig(tag);
+                return (
+                  <Badge 
+                    key={tag} 
+                    variant="outline" 
+                    className={cn('gap-1 border', tagConfig.color)}
+                  >
+                    <Tag className="h-3 w-3" />
+                    {tagConfig.label}
+                  </Badge>
+                );
+              })}
+            </div>
+          )}
 
           {/* Admin Actions */}
           {isAdmin && question.status !== 'converted' && (

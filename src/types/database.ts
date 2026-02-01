@@ -53,6 +53,8 @@ export interface ForumQuestion {
   resolved_at: string | null;
   converted_problem_id: string | null;
   answer_count: number;
+  category_id: string | null;
+  tags: string[];
   created_at: string;
   updated_at: string;
 }

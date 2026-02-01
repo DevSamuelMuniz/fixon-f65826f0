@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import type { ForumQuestion, ForumAnswer } from '@/types/database';
+import type { ForumQuestion, ForumAnswer, Category } from '@/types/database';
 
 // Get a fingerprint for anonymous users (simple hash based on browser info)
 const getFingerprint = (): string => {
@@ -21,35 +21,53 @@ const getFingerprint = (): string => {
   return Math.abs(hash).toString(16).padStart(16, '0');
 };
 
-// Fetch all forum questions
-export function useForumQuestions(status?: string) {
+export interface ForumFilters {
+  status?: string;
+  categoryId?: string;
+  tag?: string;
+}
+
+export interface ForumQuestionWithCategory extends ForumQuestion {
+  category?: Category | null;
+}
+
+// Fetch all forum questions with optional filters
+export function useForumQuestions(filters?: ForumFilters) {
   return useQuery({
-    queryKey: ['forum-questions', status],
+    queryKey: ['forum-questions', filters],
     queryFn: async () => {
       let query = supabase
         .from('forum_questions')
-        .select('*')
+        .select('*, category:categories(*)')
         .order('created_at', { ascending: false });
       
-      if (status) {
-        query = query.eq('status', status);
+      if (filters?.status) {
+        query = query.eq('status', filters.status);
+      }
+      
+      if (filters?.categoryId) {
+        query = query.eq('category_id', filters.categoryId);
+      }
+      
+      if (filters?.tag) {
+        query = query.contains('tags', [filters.tag]);
       }
       
       const { data, error } = await query;
       if (error) throw error;
-      return data as ForumQuestion[];
+      return data as ForumQuestionWithCategory[];
     },
   });
 }
 
-// Fetch single question with answers
+// Fetch single question with answers and category
 export function useForumQuestion(questionId: string) {
   return useQuery({
     queryKey: ['forum-question', questionId],
     queryFn: async () => {
       const { data: question, error: questionError } = await supabase
         .from('forum_questions')
-        .select('*')
+        .select('*, category:categories(*)')
         .eq('id', questionId)
         .maybeSingle();
       
@@ -66,7 +84,7 @@ export function useForumQuestion(questionId: string) {
       
       if (answersError) throw answersError;
       
-      return { ...question, answers } as ForumQuestion & { answers: ForumAnswer[] };
+      return { ...question, answers } as ForumQuestionWithCategory & { answers: ForumAnswer[] };
     },
     enabled: !!questionId,
   });
@@ -77,10 +95,24 @@ export function useCreateQuestion() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (data: { title: string; description: string; author_name?: string; author_email?: string }) => {
+    mutationFn: async (data: { 
+      title: string; 
+      description: string; 
+      author_name?: string; 
+      author_email?: string;
+      category_id?: string;
+      tags?: string[];
+    }) => {
       const { data: question, error } = await supabase
         .from('forum_questions')
-        .insert(data)
+        .insert({
+          title: data.title,
+          description: data.description,
+          author_name: data.author_name,
+          author_email: data.author_email,
+          category_id: data.category_id || null,
+          tags: data.tags || [],
+        })
         .select()
         .single();
       
@@ -122,7 +154,6 @@ export function useToggleUpvote() {
   
   return useMutation({
     mutationFn: async ({ answerId, questionId }: { answerId: string; questionId: string }) => {
-      // Use secure RPC function that handles ownership validation
       const { data, error } = await supabase
         .rpc('toggle_upvote', {
           p_answer_id: answerId,
@@ -167,13 +198,11 @@ export function useMarkAsSolution() {
   
   return useMutation({
     mutationFn: async ({ answerId, questionId }: { answerId: string; questionId: string }) => {
-      // First, unmark any existing solution
       await supabase
         .from('forum_answers')
         .update({ is_solution: false })
         .eq('question_id', questionId);
       
-      // Mark new solution
       const { error: answerError } = await supabase
         .from('forum_answers')
         .update({ is_solution: true })
@@ -181,7 +210,6 @@ export function useMarkAsSolution() {
       
       if (answerError) throw answerError;
       
-      // Update question status
       const { error: questionError } = await supabase
         .from('forum_questions')
         .update({ status: 'resolved', resolved_at: new Date().toISOString() })
@@ -202,7 +230,6 @@ export function useConvertToProblem() {
   
   return useMutation({
     mutationFn: async ({ questionId, categoryId }: { questionId: string; categoryId: string }) => {
-      // Get question data
       const { data: question, error: fetchError } = await supabase
         .from('forum_questions')
         .select('*')
@@ -211,7 +238,6 @@ export function useConvertToProblem() {
       
       if (fetchError) throw fetchError;
       
-      // Get solution answer
       const { data: solution } = await supabase
         .from('forum_answers')
         .select('content')
@@ -219,7 +245,6 @@ export function useConvertToProblem() {
         .eq('is_solution', true)
         .maybeSingle();
       
-      // Create slug from title
       const slug = question.title
         .toLowerCase()
         .normalize('NFD')
@@ -227,7 +252,6 @@ export function useConvertToProblem() {
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '');
       
-      // Create problem
       const { data: problem, error: createError } = await supabase
         .from('problems')
         .insert({
@@ -243,7 +267,6 @@ export function useConvertToProblem() {
       
       if (createError) throw createError;
       
-      // Update question status
       const { error: updateError } = await supabase
         .from('forum_questions')
         .update({ 

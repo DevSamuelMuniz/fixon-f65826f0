@@ -1,13 +1,16 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { MessageCircle, Plus, Clock, CheckCircle2, FileText, ChevronRight, HelpCircle, Users } from 'lucide-react';
+import { MessageCircle, Plus, Clock, CheckCircle2, FileText, ChevronRight, HelpCircle, Users, Tag, FolderOpen, X, Filter } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { UserAvatar } from '@/components/UserAvatar';
-import { useForumQuestions } from '@/hooks/useForum';
+import { useForumQuestions, ForumFilters } from '@/hooks/useForum';
+import { useCategories } from '@/hooks/useCategories';
 import { cn } from '@/lib/utils';
 import { AdInFeed } from '@/components/ads';
 import React from 'react';
@@ -17,6 +20,17 @@ const statusConfig = {
   resolved: { label: 'Resolvida', color: 'bg-green-500/10 text-green-500 border-green-500/20', icon: CheckCircle2 },
   converted: { label: 'Artigo criado', color: 'bg-purple-500/10 text-purple-500 border-purple-500/20', icon: FileText },
 };
+
+const AVAILABLE_TAGS = [
+  { value: 'urgente', label: 'Urgente', color: 'bg-red-500/10 text-red-500 border-red-500/30' },
+  { value: 'iniciante', label: 'Iniciante', color: 'bg-green-500/10 text-green-500 border-green-500/30' },
+  { value: 'avancado', label: 'Avançado', color: 'bg-purple-500/10 text-purple-500 border-purple-500/30' },
+  { value: 'dica', label: 'Dica', color: 'bg-amber-500/10 text-amber-500 border-amber-500/30' },
+  { value: 'erro', label: 'Erro', color: 'bg-orange-500/10 text-orange-500 border-orange-500/30' },
+  { value: 'configuracao', label: 'Configuração', color: 'bg-blue-500/10 text-blue-500 border-blue-500/30' },
+  { value: 'instalacao', label: 'Instalação', color: 'bg-cyan-500/10 text-cyan-500 border-cyan-500/30' },
+  { value: 'atualizacao', label: 'Atualização', color: 'bg-indigo-500/10 text-indigo-500 border-indigo-500/30' },
+];
 
 function formatTimeAgo(dateString: string): string {
   const date = new Date(dateString);
@@ -34,9 +48,31 @@ function formatTimeAgo(dateString: string): string {
   return date.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' });
 }
 
+function getTagConfig(tag: string) {
+  return AVAILABLE_TAGS.find(t => t.value === tag) || { value: tag, label: tag, color: 'bg-muted text-muted-foreground border-border' };
+}
+
 export default function ForumPage() {
   const [activeTab, setActiveTab] = useState<string>('all');
-  const { data: questions, isLoading } = useForumQuestions(activeTab === 'all' ? undefined : activeTab);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedTag, setSelectedTag] = useState<string>('all');
+  
+  const { data: categories } = useCategories();
+  
+  const filters: ForumFilters = useMemo(() => ({
+    status: activeTab === 'all' ? undefined : activeTab,
+    categoryId: selectedCategory && selectedCategory !== 'all' ? selectedCategory : undefined,
+    tag: selectedTag && selectedTag !== 'all' ? selectedTag : undefined,
+  }), [activeTab, selectedCategory, selectedTag]);
+  
+  const { data: questions, isLoading } = useForumQuestions(filters);
+  
+  const hasActiveFilters = (selectedCategory && selectedCategory !== 'all') || (selectedTag && selectedTag !== 'all');
+
+  const clearFilters = () => {
+    setSelectedCategory('all');
+    setSelectedTag('all');
+  };
 
   return (
     <Layout>
@@ -71,6 +107,58 @@ export default function ForumPage() {
         </div>
       </section>
 
+      {/* Filters */}
+      <section className="py-4 px-4 border-b border-border bg-card/50">
+        <div className="container">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Filter className="h-4 w-4" />
+              <span className="hidden sm:inline">Filtrar:</span>
+            </div>
+            
+            {/* Category Filter */}
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-[160px] h-9">
+                <FolderOpen className="h-4 w-4 mr-2 text-muted-foreground" />
+                <SelectValue placeholder="Categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas categorias</SelectItem>
+                {categories?.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            {/* Tag Filter */}
+            <Select value={selectedTag} onValueChange={setSelectedTag}>
+              <SelectTrigger className="w-[140px] h-9">
+                <Tag className="h-4 w-4 mr-2 text-muted-foreground" />
+                <SelectValue placeholder="Tag" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas tags</SelectItem>
+                {AVAILABLE_TAGS.map((tag) => (
+                  <SelectItem key={tag.value} value={tag.value}>
+                    {tag.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            {/* Clear Filters */}
+            {hasActiveFilters && (
+              <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-1 h-9">
+                <X className="h-4 w-4" />
+                Limpar
+              </Button>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* Questions List */}
       <section className="py-8 px-4">
         <div className="container">
@@ -100,6 +188,7 @@ export default function ForumPage() {
                   {questions.map((question, index) => {
                     const status = statusConfig[question.status as keyof typeof statusConfig];
                     const StatusIcon = status?.icon || HelpCircle;
+                    const questionTags = question.tags || [];
                     
                     return (
                       <React.Fragment key={question.id}>
@@ -134,6 +223,30 @@ export default function ForumPage() {
                                 <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
                                   {question.description}
                                 </p>
+                                
+                                {/* Tags & Category */}
+                                {(question.category || questionTags.length > 0) && (
+                                  <div className="flex flex-wrap items-center gap-1.5 mb-3">
+                                    {question.category && (
+                                      <Badge variant="outline" className="text-xs px-2 py-0 h-5 bg-primary/5 border-primary/20 text-primary">
+                                        <FolderOpen className="h-3 w-3 mr-1" />
+                                        {question.category.name}
+                                      </Badge>
+                                    )}
+                                    {questionTags.map((tag) => {
+                                      const tagConfig = getTagConfig(tag);
+                                      return (
+                                        <Badge 
+                                          key={tag} 
+                                          variant="outline" 
+                                          className={cn('text-xs px-2 py-0 h-5 border', tagConfig.color)}
+                                        >
+                                          {tagConfig.label}
+                                        </Badge>
+                                      );
+                                    })}
+                                  </div>
+                                )}
                                 
                                 {/* Footer */}
                                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
@@ -184,11 +297,22 @@ export default function ForumPage() {
                   <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
                     <MessageCircle className="h-10 w-10 text-muted-foreground" />
                   </div>
-                  <h3 className="font-semibold text-foreground mb-2">Nenhuma pergunta ainda</h3>
-                  <p className="text-muted-foreground mb-6">Seja o primeiro a fazer uma pergunta!</p>
-                  <Link to="/forum/nova-pergunta">
-                    <Button>Fazer uma pergunta</Button>
-                  </Link>
+                  <h3 className="font-semibold text-foreground mb-2">
+                    {hasActiveFilters ? 'Nenhuma pergunta com esses filtros' : 'Nenhuma pergunta ainda'}
+                  </h3>
+                  <p className="text-muted-foreground mb-6">
+                    {hasActiveFilters ? 'Tente ajustar os filtros ou' : 'Seja o primeiro a'} fazer uma pergunta!
+                  </p>
+                  <div className="flex justify-center gap-3">
+                    {hasActiveFilters && (
+                      <Button variant="outline" onClick={clearFilters}>
+                        Limpar filtros
+                      </Button>
+                    )}
+                    <Link to="/forum/nova-pergunta">
+                      <Button>Fazer uma pergunta</Button>
+                    </Link>
+                  </div>
                 </motion.div>
               )}
             </TabsContent>
