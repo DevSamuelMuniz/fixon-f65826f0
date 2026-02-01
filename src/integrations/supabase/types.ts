@@ -89,6 +89,13 @@ export type Database = {
             referencedRelation: "forum_questions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "forum_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "forum_questions_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       forum_questions: {
@@ -300,7 +307,86 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      forum_questions_public: {
+        Row: {
+          answer_count: number | null
+          author_email_masked: string | null
+          author_name: string | null
+          converted_problem_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          niche: string | null
+          resolved_at: string | null
+          status: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          answer_count?: number | null
+          author_email_masked?: never
+          author_name?: string | null
+          converted_problem_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          niche?: string | null
+          resolved_at?: string | null
+          status?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          answer_count?: number | null
+          author_email_masked?: never
+          author_name?: string | null
+          converted_problem_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          niche?: string | null
+          resolved_at?: string | null
+          status?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_questions_converted_problem_id_fkey"
+            columns: ["converted_problem_id"]
+            isOneToOne: false
+            referencedRelation: "problems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles_public: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          display_name: string | null
+          id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
