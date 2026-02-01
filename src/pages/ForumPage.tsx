@@ -8,6 +8,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useForumQuestions } from '@/hooks/useForum';
 import { cn } from '@/lib/utils';
+import { AdInFeed } from '@/components/ads';
+import React from 'react';
 
 const statusConfig = {
   open: { label: 'Aberta', color: 'bg-blue-500/10 text-blue-500', icon: HelpCircle },
@@ -76,48 +78,53 @@ export default function ForumPage() {
                     const StatusIcon = status?.icon || HelpCircle;
                     
                     return (
-                      <motion.div
-                        key={question.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                      >
-                        <Link
-                          to={`/forum/${question.id}`}
-                          className="group flex gap-4 p-4 bg-card border border-border rounded-xl hover:border-primary/50 hover:shadow-lg transition-all"
+                      <React.Fragment key={question.id}>
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.05 }}
                         >
-                          <div className={cn('flex-shrink-0 p-3 rounded-xl', status?.color)}>
-                            <StatusIcon className="h-6 w-6" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2">
-                              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                                {question.title}
-                              </h3>
-                              <span className={cn('flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-medium', status?.color)}>
-                                {status?.label}
-                              </span>
+                          <Link
+                            to={`/forum/${question.id}`}
+                            className="group flex gap-4 p-4 bg-card border border-border rounded-xl hover:border-primary/50 hover:shadow-lg transition-all"
+                          >
+                            <div className={cn('flex-shrink-0 p-3 rounded-xl', status?.color)}>
+                              <StatusIcon className="h-6 w-6" />
                             </div>
-                            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                              {question.description}
-                            </p>
-                            <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
-                              <span className="flex items-center gap-1">
-                                <MessageCircle className="h-3.5 w-3.5" />
-                                {question.answer_count} respostas
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Clock className="h-3.5 w-3.5" />
-                                {new Date(question.created_at).toLocaleDateString('pt-BR')}
-                              </span>
-                              {question.author_name && (
-                                <span>por {question.author_name}</span>
-                              )}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2">
+                                <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                                  {question.title}
+                                </h3>
+                                <span className={cn('flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-medium', status?.color)}>
+                                  {status?.label}
+                                </span>
+                              </div>
+                              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                {question.description}
+                              </p>
+                              <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
+                                <span className="flex items-center gap-1">
+                                  <MessageCircle className="h-3.5 w-3.5" />
+                                  {question.answer_count} respostas
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Clock className="h-3.5 w-3.5" />
+                                  {new Date(question.created_at).toLocaleDateString('pt-BR')}
+                                </span>
+                                {question.author_name && (
+                                  <span>por {question.author_name}</span>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                          <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 self-center" />
-                        </Link>
-                      </motion.div>
+                            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 self-center" />
+                          </Link>
+                        </motion.div>
+                        {/* Show ad after every 5 questions */}
+                        {(index + 1) % 5 === 0 && index < questions.length - 1 && (
+                          <AdInFeed />
+                        )}
+                      </React.Fragment>
                     );
                   })}
                 </div>
