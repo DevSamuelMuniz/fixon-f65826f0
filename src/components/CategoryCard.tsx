@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Smartphone, Monitor, Wifi, AppWindow, LucideIcon, ChevronRight } from 'lucide-react';
+import { Smartphone, Monitor, Wifi, AppWindow, Home, Car, HeartPulse, Wallet, LucideIcon, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CategoryCardProps {
@@ -22,6 +22,14 @@ const iconMap: Record<string, LucideIcon> = {
   computador: Monitor,
   internet: Wifi,
   aplicativos: AppWindow,
+  casa: Home,
+  home: Home,
+  carro: Car,
+  car: Car,
+  saude: HeartPulse,
+  'heart-pulse': HeartPulse,
+  financas: Wallet,
+  wallet: Wallet,
 };
 
 const colorConfig: Record<string, { bg: string; icon: string; gradient: string; border: string }> = {
@@ -48,6 +56,30 @@ const colorConfig: Record<string, { bg: string; icon: string; gradient: string; 
     icon: 'text-orange-500',
     gradient: 'from-orange-500/20 to-orange-600/5',
     border: 'hover:border-orange-500/50',
+  },
+  casa: {
+    bg: 'bg-amber-500/10 hover:bg-amber-500/20',
+    icon: 'text-amber-500',
+    gradient: 'from-amber-500/20 to-amber-600/5',
+    border: 'hover:border-amber-500/50',
+  },
+  carro: {
+    bg: 'bg-red-500/10 hover:bg-red-500/20',
+    icon: 'text-red-500',
+    gradient: 'from-red-500/20 to-red-600/5',
+    border: 'hover:border-red-500/50',
+  },
+  saude: {
+    bg: 'bg-pink-500/10 hover:bg-pink-500/20',
+    icon: 'text-pink-500',
+    gradient: 'from-pink-500/20 to-pink-600/5',
+    border: 'hover:border-pink-500/50',
+  },
+  financas: {
+    bg: 'bg-emerald-500/10 hover:bg-emerald-500/20',
+    icon: 'text-emerald-500',
+    gradient: 'from-emerald-500/20 to-emerald-600/5',
+    border: 'hover:border-emerald-500/50',
   },
 };
 
