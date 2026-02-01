@@ -1,174 +1,130 @@
 
-# Melhorias de Design - FIX-ON
+# Plano: Sistema de Anúncios Multi-Nicho
 
 ## Visão Geral
-Vamos transformar o visual do FIX-ON com mais ícones, ilustrações, animações sutis e elementos visuais que tornam a experiência mais agradável e profissional.
+
+Implementar um sistema de anúncios Google AdSense integrado à arquitetura multi-tenant, onde cada nicho (tech, health, auto, casa) utiliza seu próprio ID de AdSense e posicionamentos estratégicos de ads.
 
 ---
 
-## 1. Hero Section (Página Inicial)
+## Componentes a Criar
 
-**Melhorias:**
-- Adicionar ilustração decorativa de fundo (gradiente animado ou padrão geométrico)
-- Ícones flutuantes animados representando tecnologia (smartphone, wifi, laptop, etc.)
-- Badge "Grátis e rápido" acima do título
-- Estatísticas visuais (ex: "+500 problemas resolvidos")
+### 1. Componente Base de Anúncio
+**Arquivo:** `src/components/ads/AdUnit.tsx`
 
-**Visual:**
-- Fundo com gradiente sutil azul → branco
-- Elementos decorativos com blur (glassmorphism)
-- Ícones animados com efeito de "float"
+Componente reutilizável que:
+- Carrega o AdSense ID do nicho atual via `useNiche()`
+- Suporta diferentes formatos (banner, retângulo, in-article, sidebar)
+- Renderiza condicionalmente baseado na configuração de monetização
+- Inclui placeholder visual durante carregamento
 
----
+### 2. Componentes Especializados
 
-## 2. Cards de Categoria
+| Componente | Uso | Formato |
+|------------|-----|---------|
+| `AdBanner.tsx` | Topo/rodapé de páginas | 728x90 / responsivo |
+| `AdInArticle.tsx` | Entre seções de conteúdo | 300x250 / nativo |
+| `AdSidebar.tsx` | Lateral em desktop | 300x600 / vertical |
 
-**Melhorias:**
-- Ícones maiores e mais expressivos
-- Efeito de hover com scale e shadow
-- Contador de problemas em cada categoria
-- Gradiente de fundo no hover
-- Ícones animados (pulse no hover)
+### 3. Script Loader
+**Arquivo:** `src/components/ads/AdSenseScript.tsx`
 
-**Novos ícones por categoria:**
-- Celular: Smartphone com notificações
-- Computador: Monitor com engrenagem
-- Internet: Globe com ondas
-- Aplicativos: Grid de apps
+Carrega o script do Google AdSense dinamicamente com o Publisher ID correto do nicho.
 
 ---
 
-## 3. Cards de Problemas
+## Posicionamento dos Anúncios
 
-**Melhorias:**
-- Ícone indicador de dificuldade (fácil/médio/difícil)
-- Badge de "Popular" ou "Novo"
-- Ícone da categoria ao lado
-- Tempo estimado de resolução
-- Animação de entrada (fade-in staggered)
+### Página Inicial (`Index.tsx`)
+- 1 banner após seção "Categorias"
+- 1 ad in-article antes da seção "Como funciona"
 
----
+### Página de Problema (`ProblemPage.tsx`)
+- 1 ad após "Resposta rápida"
+- 1 ad após os passos (antes de "Problemas relacionados")
+- 1 ad sidebar em desktop
 
-## 4. Seção "Como Funciona"
+### Página de Categoria (`CategoryPage.tsx`)
+- 1 banner após lista de 3 problemas
+- 1 ad no final da página
 
-**Melhorias:**
-- Ilustrações coloridas para cada passo
-- Linha conectora entre os passos (timeline visual)
-- Animação de progresso ao fazer scroll
-- Cards com sombra e borda colorida
-- Números grandes e estilizados
+### Fórum (`ForumPage.tsx`)
+- 1 ad in-feed a cada 5 perguntas
 
 ---
 
-## 5. Página de Problema (Solução)
+## Configuração por Nicho
 
-**Melhorias:**
-- Header com ilustração temática da categoria
-- Passos com ícones específicos para cada tipo de ação
-- Checkboxes interativos para marcar passos completos
-- Barra de progresso visual
-- Seção de "Avisos" com ícone de alerta estilizado
-- Botões de feedback (👍 Resolveu / 👎 Não resolveu)
+A estrutura já existente em `src/config/niches/` será utilizada:
 
----
-
-## 6. Página de Categoria
-
-**Melhorias:**
-- Banner header com ilustração da categoria
-- Gradiente de cor da categoria no topo
-- Filtros visuais (botões estilizados)
-- Grid com animação de entrada
+```text
+monetization: {
+  adsenseId: 'ca-pub-XXXXX',  // ID único por nicho
+  affiliateLinks: {...},
+  leadCaptureEnabled: true,
+}
+```
 
 ---
 
-## 7. Estados Vazios e 404
+## Arquivos a Criar/Modificar
 
-**Melhorias:**
-- Ilustração SVG personalizada para 404
-- Animação de "procurando" para estados vazios
-- Mensagens amigáveis com emojis/ícones
+### Criar:
+1. `src/components/ads/AdUnit.tsx` - Componente base
+2. `src/components/ads/AdBanner.tsx` - Banner horizontal
+3. `src/components/ads/AdInArticle.tsx` - Ad nativo em conteúdo
+4. `src/components/ads/AdSidebar.tsx` - Ad vertical lateral
+5. `src/components/ads/AdSenseScript.tsx` - Loader do script
+6. `src/components/ads/index.ts` - Exports
 
----
-
-## 8. Footer e Header
-
-**Header:**
-- Ícones nos itens do menu mobile
-- Badge de notificação (futuro)
-- Animação no menu hambúrguer
-
-**Footer:**
-- Ícones de redes sociais (placeholders)
-- Separadores visuais
-- Newsletter input estilizado
+### Modificar:
+1. `src/components/layout/Layout.tsx` - Adicionar AdSenseScript
+2. `src/pages/Index.tsx` - Inserir ads nas posições
+3. `src/pages/ProblemPage.tsx` - Inserir ads nas posições
+4. `src/pages/CategoryPage.tsx` - Inserir ads nas posições
+5. `src/pages/ForumPage.tsx` - Inserir ads in-feed
 
 ---
 
-## 9. Novos Componentes Visuais
+## Detalhes Técnicos
 
-**Criar:**
-- `FloatingIcons` - Ícones decorativos animados
-- `GradientBackground` - Fundos com gradiente
-- `AnimatedCounter` - Contador animado de estatísticas
-- `CategoryBanner` - Banner decorativo por categoria
-- `ProgressChecklist` - Checklist interativo
-- `FeedbackButtons` - Botões de feedback
-- `EmptyState` - Estados vazios ilustrados
+### Estrutura do AdUnit
 
----
+O componente base detectará o nicho e renderizará:
 
-## 10. Animações e Micro-interações
+```text
+┌─────────────────────────────────────┐
+│  [AdUnit]                           │
+│  - Detecta nicho via useNiche()     │
+│  - Pega adsenseId da config         │
+│  - Renderiza slot do Google Ads     │
+│  - Fallback: placeholder ou nada    │
+└─────────────────────────────────────┘
+```
 
-**Adicionar:**
-- Framer Motion para animações de entrada
-- Hover effects em todos os elementos clicáveis
-- Loading skeletons com shimmer effect
-- Transições suaves entre páginas
-- Scroll animations (fade-in ao aparecer)
+### Formatos Suportados
 
----
+| Formato | Dimensões | Uso |
+|---------|-----------|-----|
+| `banner` | 728x90, 320x50 (mobile) | Header/Footer |
+| `rectangle` | 300x250 | Conteúdo |
+| `vertical` | 300x600 | Sidebar |
+| `in-article` | Responsivo | Entre parágrafos |
+| `in-feed` | Nativo | Listas |
 
-## Implementação Técnica
+### Responsividade
 
-### Arquivos a modificar:
-1. `src/index.css` - Novas animações CSS e variáveis
-2. `src/components/CategoryCard.tsx` - Redesign com novos ícones
-3. `src/components/ProblemCard.tsx` - Badges e indicadores
-4. `src/components/HowItWorks.tsx` - Timeline visual
-5. `src/components/StepByStep.tsx` - Checkboxes interativos
-6. `src/pages/Index.tsx` - Hero com ilustrações
-7. `src/pages/CategoryPage.tsx` - Banner header
-8. `src/pages/ProblemPage.tsx` - Feedback e progresso
-9. `src/pages/NotFound.tsx` - Ilustração 404
-
-### Novos arquivos:
-- `src/components/FloatingIcons.tsx`
-- `src/components/CategoryBanner.tsx`
-- `src/components/EmptyState.tsx`
-- `src/components/FeedbackButtons.tsx`
-- `src/components/StatsBadge.tsx`
+Os ads serão adaptados para mobile:
+- Banner desktop (728x90) → mobile (320x50)
+- Sidebar oculta em mobile
+- In-article mantém proporção
 
 ---
 
-## Cores e Gradientes
+## Considerações de Performance
 
-**Gradientes por categoria:**
-- Celular: `linear-gradient(135deg, #3B82F6, #1D4ED8)`
-- Computador: `linear-gradient(135deg, #10B981, #059669)`
-- Internet: `linear-gradient(135deg, #8B5CF6, #6D28D9)`
-- Aplicativos: `linear-gradient(135deg, #F97316, #EA580C)`
+- Scripts carregados de forma assíncrona
+- Ads renderizados após conteúdo principal
+- Lazy loading para ads abaixo da dobra
+- Sem impacto em Core Web Vitals
 
-**Efeitos:**
-- Glassmorphism no Hero
-- Soft shadows nos cards
-- Glow effect no botão principal
-
----
-
-## Resultado Esperado
-- Visual mais moderno e atraente
-- Experiência mais envolvente com animações
-- Melhor feedback visual para o usuário
-- Design consistente com a identidade da marca
-- Interface mais intuitiva com indicadores visuais
