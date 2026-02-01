@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   Mail, Lock, User, ArrowRight, Loader2, Phone, MapPin, 
   Wrench, MessageCircle, Zap, Shield, CheckCircle2, Sparkles
@@ -12,7 +12,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import logoFull from '@/assets/logo-full.png';
 
 const brazilianStates = [
   { value: 'AC', label: 'Acre' },
@@ -207,13 +206,13 @@ export default function AuthPage() {
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-center px-12 xl:px-20">
           <Link to="/">
-            <motion.img
+            <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              src={logoFull}
-              alt="Fix-on"
-              className="h-12 mb-12 brightness-0 invert"
-            />
+              className="text-3xl font-bold text-white mb-12"
+            >
+              Fix-on
+            </motion.div>
           </Link>
 
           <motion.h2
@@ -266,7 +265,7 @@ export default function AuthPage() {
         >
           {/* Mobile Logo */}
           <Link to="/" className="lg:hidden flex justify-center mb-8">
-            <img src={logoFull} alt="Fix-on" className="h-10" />
+            <div className="text-2xl font-bold text-primary">Fix-on</div>
           </Link>
 
           <div className="bg-card border border-border rounded-2xl shadow-xl overflow-hidden">
@@ -277,7 +276,7 @@ export default function AuthPage() {
                 onClick={() => setIsLogin(true)}
                 className={`flex-1 py-4 px-6 text-sm font-medium transition-colors relative ${
                   isLogin 
-                    ? 'text-primary' 
+                    ? 'text-primary border-b-2 border-primary' 
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -285,19 +284,13 @@ export default function AuthPage() {
                   <User className="h-4 w-4" />
                   Entrar
                 </div>
-                {isLogin && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
-                  />
-                )}
               </button>
               <button
                 type="button"
                 onClick={() => setIsLogin(false)}
                 className={`flex-1 py-4 px-6 text-sm font-medium transition-colors relative ${
                   !isLogin 
-                    ? 'text-primary' 
+                    ? 'text-primary border-b-2 border-primary' 
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -305,188 +298,172 @@ export default function AuthPage() {
                   <Sparkles className="h-4 w-4" />
                   Criar conta
                 </div>
-                {!isLogin && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
-                  />
-                )}
               </button>
             </div>
 
             {/* Form Content */}
-            <AnimatePresence mode="wait">
-              <motion.form
-                key={isLogin ? 'login' : 'signup'}
-                initial={{ opacity: 0, x: isLogin ? -20 : 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: isLogin ? 20 : -20 }}
-                transition={{ duration: 0.2 }}
-                onSubmit={handleSubmit}
-                className="p-6 space-y-4"
-              >
-                {/* Header Text */}
-                <div className="text-center mb-6">
-                  <h1 className="text-xl font-bold text-foreground">
-                    {isLogin ? 'Bem-vindo de volta!' : 'Junte-se a nós'}
-                  </h1>
-                  <p className="text-muted-foreground text-sm mt-1">
-                    {isLogin 
-                      ? 'Entre para acessar sua conta' 
-                      : 'Crie sua conta gratuita'}
-                  </p>
-                </div>
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              {/* Header Text */}
+              <div className="text-center mb-6">
+                <h1 className="text-xl font-bold text-foreground">
+                  {isLogin ? 'Bem-vindo de volta!' : 'Junte-se a nós'}
+                </h1>
+                <p className="text-muted-foreground text-sm mt-1">
+                  {isLogin 
+                    ? 'Entre para acessar sua conta' 
+                    : 'Crie sua conta gratuita'}
+                </p>
+              </div>
 
-                {!isLogin && (
-                  <>
-                    {/* Nome */}
-                    <div className="space-y-2">
-                      <Label htmlFor="name" className="text-sm">Nome completo *</Label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="name"
-                          type="text"
-                          placeholder="Seu nome completo"
-                          value={displayName}
-                          onChange={(e) => setDisplayName(e.target.value)}
-                          className="pl-10"
-                          maxLength={100}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Telefone */}
-                    <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-sm">Telefone</Label>
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="phone"
-                          type="tel"
-                          placeholder="(XX) XXXXX-XXXX"
-                          value={phone}
-                          onChange={handlePhoneChange}
-                          className="pl-10"
-                          maxLength={15}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Estado e Cidade */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-2">
-                        <Label htmlFor="state" className="text-sm">Estado</Label>
-                        <Select value={state} onValueChange={setState}>
-                          <SelectTrigger>
-                            <MapPin className="h-4 w-4 text-muted-foreground mr-2" />
-                            <SelectValue placeholder="UF" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {brazilianStates.map((s) => (
-                              <SelectItem key={s.value} value={s.value}>
-                                {s.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="city" className="text-sm">Cidade</Label>
-                        <Input
-                          id="city"
-                          type="text"
-                          placeholder="Sua cidade"
-                          value={city}
-                          onChange={(e) => setCity(e.target.value)}
-                          maxLength={100}
-                        />
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {/* Email */}
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm">Email *</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10"
-                      maxLength={255}
-                    />
-                  </div>
-                </div>
-
-                {/* Senha */}
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm">Senha *</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-
-                {/* Confirmar Senha */}
-                {!isLogin && (
+              {!isLogin && (
+                <>
+                  {/* Nome */}
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword" className="text-sm">Confirmar Senha *</Label>
+                    <Label htmlFor="name" className="text-sm">Nome completo *</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
-                        id="confirmPassword"
-                        type="password"
-                        placeholder="••••••••"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        id="name"
+                        type="text"
+                        placeholder="Seu nome completo"
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
                         className="pl-10"
+                        maxLength={100}
                       />
                     </div>
                   </div>
-                )}
 
-                <Button 
-                  type="submit" 
-                  className="w-full h-11 mt-2"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <>
-                      {isLogin ? 'Entrar' : 'Criar conta'}
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </>
-                  )}
-                </Button>
-
-                {/* Features list on mobile */}
-                {!isLogin && (
-                  <div className="lg:hidden pt-4 border-t border-border mt-6">
-                    <div className="grid grid-cols-2 gap-3">
-                      {features.map((feature) => (
-                        <div key={feature.title} className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <CheckCircle2 className="h-3.5 w-3.5 text-primary flex-shrink-0" />
-                          <span>{feature.title}</span>
-                        </div>
-                      ))}
+                  {/* Telefone */}
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="text-sm">Telefone</Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="(XX) XXXXX-XXXX"
+                        value={phone}
+                        onChange={handlePhoneChange}
+                        className="pl-10"
+                        maxLength={15}
+                      />
                     </div>
                   </div>
+
+                  {/* Estado e Cidade */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="state" className="text-sm">Estado</Label>
+                      <Select value={state} onValueChange={setState}>
+                        <SelectTrigger>
+                          <MapPin className="h-4 w-4 text-muted-foreground mr-2" />
+                          <SelectValue placeholder="UF" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {brazilianStates.map((s) => (
+                            <SelectItem key={s.value} value={s.value}>
+                              {s.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="city" className="text-sm">Cidade</Label>
+                      <Input
+                        id="city"
+                        type="text"
+                        placeholder="Sua cidade"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        maxLength={100}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Email */}
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm">Email *</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="seu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10"
+                    maxLength={255}
+                  />
+                </div>
+              </div>
+
+              {/* Senha */}
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm">Senha *</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
+              {/* Confirmar Senha */}
+              {!isLogin && (
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword" className="text-sm">Confirmar Senha *</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="••••••••"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <Button 
+                type="submit" 
+                className="w-full h-11 mt-2"
+                disabled={loading}
+              >
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    {isLogin ? 'Entrar' : 'Criar conta'}
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </>
                 )}
-              </motion.form>
-            </AnimatePresence>
+              </Button>
+
+              {/* Features list on mobile */}
+              {!isLogin && (
+                <div className="lg:hidden pt-4 border-t border-border mt-6">
+                  <div className="grid grid-cols-2 gap-3">
+                    {features.map((feature) => (
+                      <div key={feature.title} className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                        <span>{feature.title}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </form>
           </div>
 
           {/* Footer Links */}
