@@ -62,6 +62,7 @@ export type Database = {
           is_solution: boolean
           question_id: string
           upvote_count: number
+          user_id: string | null
         }
         Insert: {
           author_name?: string | null
@@ -71,6 +72,7 @@ export type Database = {
           is_solution?: boolean
           question_id: string
           upvote_count?: number
+          user_id?: string | null
         }
         Update: {
           author_name?: string | null
@@ -80,6 +82,7 @@ export type Database = {
           is_solution?: boolean
           question_id?: string
           upvote_count?: number
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -108,12 +111,16 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          is_pinned: boolean
+          last_activity_at: string | null
           niche: string | null
           resolved_at: string | null
           status: string
           tags: string[] | null
           title: string
           updated_at: string
+          user_id: string | null
+          view_count: number
         }
         Insert: {
           answer_count?: number
@@ -124,12 +131,16 @@ export type Database = {
           created_at?: string
           description: string
           id?: string
+          is_pinned?: boolean
+          last_activity_at?: string | null
           niche?: string | null
           resolved_at?: string | null
           status?: string
           tags?: string[] | null
           title: string
           updated_at?: string
+          user_id?: string | null
+          view_count?: number
         }
         Update: {
           answer_count?: number
@@ -140,12 +151,16 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          is_pinned?: boolean
+          last_activity_at?: string | null
           niche?: string | null
           resolved_at?: string | null
           status?: string
           tags?: string[] | null
           title?: string
           updated_at?: string
+          user_id?: string | null
+          view_count?: number
         }
         Relationships: [
           {
