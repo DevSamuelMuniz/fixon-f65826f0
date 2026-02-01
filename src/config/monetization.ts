@@ -13,8 +13,7 @@
  */
 
 // ID do Google AdSense Publisher
-// Substitua pelo seu ID real após aprovação
-export const ADSENSE_PUBLISHER_ID = 'ca-pub-XXXXXXXXXXXXXXXXXX';
+export const ADSENSE_PUBLISHER_ID = 'ca-pub-8733445144027820';
 
 // Slots de anúncio por formato (crie no painel do AdSense)
 export const AD_SLOTS = {
