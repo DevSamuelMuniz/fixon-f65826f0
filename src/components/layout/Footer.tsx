@@ -1,12 +1,17 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Smartphone, Monitor, Wifi, AppWindow, Info, Mail, FileText, Shield, Heart } from 'lucide-react';
+import { Smartphone, Monitor, Wifi, AppWindow, Info, Mail, FileText, Shield, Heart, MessageCircle, Users } from 'lucide-react';
 
 const categories = [
   { label: 'Celular', href: '/celular', icon: Smartphone },
   { label: 'Computador', href: '/computador', icon: Monitor },
   { label: 'Internet', href: '/internet', icon: Wifi },
   { label: 'Aplicativos', href: '/aplicativos', icon: AppWindow },
+];
+
+const community = [
+  { label: 'Fórum de Dúvidas', href: '/forum', icon: MessageCircle },
+  { label: 'Nova Pergunta', href: '/forum/nova-pergunta', icon: Users },
 ];
 
 const institutional = [
@@ -42,7 +47,7 @@ export function Footer() {
         </motion.div>
 
         {/* Links Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10 max-w-2xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-8 mb-10 max-w-3xl mx-auto">
           <div>
             <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
               <AppWindow className="h-4 w-4 text-primary" />
@@ -50,6 +55,25 @@ export function Footer() {
             </h3>
             <ul className="space-y-3">
               {categories.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    to={item.href}
+                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors min-h-0 min-w-0"
+                  >
+                    <item.icon className="h-3.5 w-3.5" />
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+              <MessageCircle className="h-4 w-4 text-purple-500" />
+              Comunidade
+            </h3>
+            <ul className="space-y-3">
+              {community.map((item) => (
                 <li key={item.href}>
                   <Link
                     to={item.href}

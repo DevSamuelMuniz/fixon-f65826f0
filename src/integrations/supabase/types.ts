@@ -50,6 +50,123 @@ export type Database = {
         }
         Relationships: []
       }
+      forum_answers: {
+        Row: {
+          author_name: string | null
+          content: string
+          created_at: string
+          id: string
+          is_solution: boolean
+          question_id: string
+          upvote_count: number
+        }
+        Insert: {
+          author_name?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          is_solution?: boolean
+          question_id: string
+          upvote_count?: number
+        }
+        Update: {
+          author_name?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          is_solution?: boolean
+          question_id?: string
+          upvote_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "forum_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      forum_questions: {
+        Row: {
+          answer_count: number
+          author_email: string | null
+          author_name: string | null
+          converted_problem_id: string | null
+          created_at: string
+          description: string
+          id: string
+          resolved_at: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          answer_count?: number
+          author_email?: string | null
+          author_name?: string | null
+          converted_problem_id?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          resolved_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          answer_count?: number
+          author_email?: string | null
+          author_name?: string | null
+          converted_problem_id?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          resolved_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_questions_converted_problem_id_fkey"
+            columns: ["converted_problem_id"]
+            isOneToOne: false
+            referencedRelation: "problems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      forum_upvotes: {
+        Row: {
+          answer_id: string
+          created_at: string
+          id: string
+          voter_fingerprint: string
+        }
+        Insert: {
+          answer_id: string
+          created_at?: string
+          id?: string
+          voter_fingerprint: string
+        }
+        Update: {
+          answer_id?: string
+          created_at?: string
+          id?: string
+          voter_fingerprint?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_upvotes_answer_id_fkey"
+            columns: ["answer_id"]
+            isOneToOne: false
+            referencedRelation: "forum_answers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       problems: {
         Row: {
           category_id: string
