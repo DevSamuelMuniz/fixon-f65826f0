@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Search, Home, Smartphone, Monitor, Wifi, AppWindow, Info, Mail } from 'lucide-react';
+import { Menu, X, Search, Home, Smartphone, Monitor, Wifi, AppWindow, Info, Mail, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
@@ -14,6 +14,7 @@ export function Header() {
     { label: 'Computador', href: '/computador', icon: Monitor },
     { label: 'Internet', href: '/internet', icon: Wifi },
     { label: 'Aplicativos', href: '/aplicativos', icon: AppWindow },
+    { label: 'Fórum', href: '/forum', icon: MessageCircle },
     { label: 'Sobre', href: '/sobre', icon: Info },
     { label: 'Contato', href: '/contato', icon: Mail },
   ];
@@ -34,7 +35,7 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-1">
-          {menuItems.slice(1, 5).map((item) => (
+          {menuItems.slice(1, 6).map((item) => (
             <Link
               key={item.href}
               to={item.href}

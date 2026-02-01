@@ -1,5 +1,6 @@
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Zap } from 'lucide-react';
+import { Zap, MessageCircle, Users, ArrowRight } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { SearchBar } from '@/components/SearchBar';
 import { CategoryCard } from '@/components/CategoryCard';
@@ -7,6 +8,7 @@ import { ProblemCard } from '@/components/ProblemCard';
 import { HowItWorks } from '@/components/HowItWorks';
 import { FloatingIcons } from '@/components/FloatingIcons';
 import { StatsBadge } from '@/components/StatsBadge';
+import { Button } from '@/components/ui/button';
 import { useCategories } from '@/hooks/useCategories';
 import { useFeaturedProblems, useProblems } from '@/hooks/useProblems';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -148,6 +150,44 @@ const Index = () => {
 
       {/* How It Works */}
       <HowItWorks />
+
+      {/* Forum CTA */}
+      <section className="py-12 px-4">
+        <div className="container">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500/10 via-primary/5 to-transparent p-8 md:p-12 border border-purple-500/20"
+          >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -mr-32 -mt-32" />
+            
+            <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 md:gap-12">
+              <div className="flex-shrink-0">
+                <div className="w-20 h-20 rounded-2xl bg-purple-500/20 flex items-center justify-center">
+                  <Users className="h-10 w-10 text-purple-500" />
+                </div>
+              </div>
+              
+              <div className="flex-1 text-center md:text-left">
+                <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+                  Não encontrou a solução?
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  Pergunte à comunidade! Outros usuários e especialistas vão te ajudar a resolver seu problema.
+                </p>
+                <Link to="/forum">
+                  <Button size="lg" className="gap-2">
+                    <MessageCircle className="h-5 w-5" />
+                    Ir para o Fórum
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
       {/* Featured Content */}
       {featuredProblems && featuredProblems.length > 0 && (

@@ -12,6 +12,9 @@ import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
+import ForumPage from "./pages/ForumPage";
+import NewQuestionPage from "./pages/NewQuestionPage";
+import QuestionDetailPage from "./pages/QuestionDetailPage";
 import AdminAuth from "./pages/admin/AdminAuth";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProblems from "./pages/admin/AdminProblems";
@@ -33,6 +36,11 @@ const App = () => (
           <Route path="/contato" element={<ContactPage />} />
           <Route path="/termos" element={<TermsPage />} />
           <Route path="/privacidade" element={<PrivacyPage />} />
+          
+          {/* Forum Routes */}
+          <Route path="/forum" element={<ForumPage />} />
+          <Route path="/forum/nova-pergunta" element={<NewQuestionPage />} />
+          <Route path="/forum/:questionId" element={<QuestionDetailPage />} />
           
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminAuth />} />
