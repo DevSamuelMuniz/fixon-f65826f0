@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { NicheProvider } from "@/contexts/NicheContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import CategoryPage from "./pages/CategoryPage";
@@ -27,41 +28,43 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/buscar" element={<SearchPage />} />
-          <Route path="/sobre" element={<AboutPage />} />
-          <Route path="/contato" element={<ContactPage />} />
-          <Route path="/termos" element={<TermsPage />} />
-          <Route path="/privacidade" element={<PrivacyPage />} />
-          <Route path="/entrar" element={<AuthPage />} />
-          <Route path="/perfil" element={<ProfilePage />} />
-          
-          {/* Forum Routes */}
-          <Route path="/forum" element={<ForumPage />} />
-          <Route path="/forum/nova-pergunta" element={<NewQuestionPage />} />
-          <Route path="/forum/:questionId" element={<QuestionDetailPage />} />
-          
-          {/* Admin Routes */}
-          <Route path="/admin" element={<AdminAuth />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/problemas" element={<AdminProblems />} />
-          <Route path="/admin/problemas/novo" element={<AdminProblemForm />} />
-          <Route path="/admin/problemas/:problemId" element={<AdminProblemForm />} />
-          <Route path="/admin/categorias" element={<AdminCategories />} />
-          
-          {/* Dynamic Routes - Must be last */}
-          <Route path="/:categorySlug" element={<CategoryPage />} />
-          <Route path="/:categorySlug/:problemSlug" element={<ProblemPage />} />
-          
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <NicheProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/buscar" element={<SearchPage />} />
+            <Route path="/sobre" element={<AboutPage />} />
+            <Route path="/contato" element={<ContactPage />} />
+            <Route path="/termos" element={<TermsPage />} />
+            <Route path="/privacidade" element={<PrivacyPage />} />
+            <Route path="/entrar" element={<AuthPage />} />
+            <Route path="/perfil" element={<ProfilePage />} />
+            
+            {/* Forum Routes */}
+            <Route path="/forum" element={<ForumPage />} />
+            <Route path="/forum/nova-pergunta" element={<NewQuestionPage />} />
+            <Route path="/forum/:questionId" element={<QuestionDetailPage />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminAuth />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/problemas" element={<AdminProblems />} />
+            <Route path="/admin/problemas/novo" element={<AdminProblemForm />} />
+            <Route path="/admin/problemas/:problemId" element={<AdminProblemForm />} />
+            <Route path="/admin/categorias" element={<AdminCategories />} />
+            
+            {/* Dynamic Routes - Must be last */}
+            <Route path="/:categorySlug" element={<CategoryPage />} />
+            <Route path="/:categorySlug/:problemSlug" element={<ProblemPage />} />
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </NicheProvider>
   </QueryClientProvider>
 );
 
