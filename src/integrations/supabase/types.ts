@@ -23,6 +23,7 @@ export type Database = {
           icon: string
           id: string
           name: string
+          niche: string | null
           slug: string
           updated_at: string
         }
@@ -34,6 +35,7 @@ export type Database = {
           icon?: string
           id?: string
           name: string
+          niche?: string | null
           slug: string
           updated_at?: string
         }
@@ -45,6 +47,7 @@ export type Database = {
           icon?: string
           id?: string
           name?: string
+          niche?: string | null
           slug?: string
           updated_at?: string
         }
@@ -97,6 +100,7 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          niche: string | null
           resolved_at: string | null
           status: string
           title: string
@@ -110,6 +114,7 @@ export type Database = {
           created_at?: string
           description: string
           id?: string
+          niche?: string | null
           resolved_at?: string | null
           status?: string
           title: string
@@ -123,6 +128,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          niche?: string | null
           resolved_at?: string | null
           status?: string
           title?: string
@@ -174,6 +180,7 @@ export type Database = {
           featured: boolean
           id: string
           meta_description: string | null
+          niche: string | null
           quick_answer: string
           related_problems: string[] | null
           slug: string
@@ -191,6 +198,7 @@ export type Database = {
           featured?: boolean
           id?: string
           meta_description?: string | null
+          niche?: string | null
           quick_answer: string
           related_problems?: string[] | null
           slug: string
@@ -208,6 +216,7 @@ export type Database = {
           featured?: boolean
           id?: string
           meta_description?: string | null
+          niche?: string | null
           quick_answer?: string
           related_problems?: string[] | null
           slug?: string
@@ -309,6 +318,7 @@ export type Database = {
           featured: boolean
           id: string
           meta_description: string | null
+          niche: string | null
           quick_answer: string
           related_problems: string[] | null
           slug: string

@@ -11,15 +11,44 @@ import { StatsBadge } from '@/components/StatsBadge';
 import { Button } from '@/components/ui/button';
 import { useCategories } from '@/hooks/useCategories';
 import { useFeaturedProblems, useProblems } from '@/hooks/useProblems';
+import { useNiche } from '@/contexts/NicheContext';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const Index = () => {
+  const { niche, nicheSlug } = useNiche();
   const { data: categories, isLoading: categoriesLoading } = useCategories();
   const { data: featuredProblems, isLoading: featuredLoading } = useFeaturedProblems();
   const { data: allProblems, isLoading: problemsLoading } = useProblems();
 
-  // Get most viewed problems
-  const popularProblems = allProblems?.slice(0, 4) || [];
+  // Filter problems by current niche
+  const nicheProblems = allProblems?.filter(p => 
+    (p as any).niche === nicheSlug || 
+    (nicheSlug === 'default' && ((p as any).niche === 'tech' || !(p as any).niche))
+  ) || [];
+  
+  // Get most viewed problems for current niche
+  const popularProblems = nicheProblems.slice(0, 4);
+
+  // Filter featured problems by niche
+  const nicheFeatured = featuredProblems?.filter(p =>
+    (p as any).niche === nicheSlug ||
+    (nicheSlug === 'default' && ((p as any).niche === 'tech' || !(p as any).niche))
+  ) || [];
+
+  // Use niche categories from config, or fall back to database categories
+  const displayCategories = niche.categories.length > 0 
+    ? niche.categories.map(cat => ({
+        id: cat.id,
+        name: cat.name,
+        slug: cat.slug,
+        icon: cat.icon,
+        color: niche.theme.primaryColorHex,
+        description: cat.description,
+      }))
+    : categories?.filter(c => 
+        (c as any).niche === nicheSlug || 
+        (nicheSlug === 'default' && ((c as any).niche === 'tech' || !(c as any).niche))
+      ) || [];
 
   return (
     <Layout>
@@ -45,8 +74,15 @@ const Index = () => {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground mb-4 text-balance"
           >
-            Qual problema você quer{' '}
-            <span className="text-primary">resolver</span> agora?
+            {niche.heroTitle.split(' ').map((word, i) => {
+              const highlightWords = ['resolver', 'tecnologia', 'saúde', 'carro', 'casa'];
+              const isHighlight = highlightWords.some(hw => word.toLowerCase().includes(hw));
+              return isHighlight ? (
+                <span key={i} className="text-primary">{word} </span>
+              ) : (
+                <span key={i}>{word} </span>
+              );
+            })}
           </motion.h1>
 
           <motion.p
@@ -55,7 +91,7 @@ const Index = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg text-muted-foreground mb-8"
           >
-            Soluções rápidas e simples para seus problemas de tecnologia
+            {niche.heroSubtitle}
           </motion.p>
 
           <motion.div
@@ -82,17 +118,17 @@ const Index = () => {
             <h2 className="text-2xl md:text-3xl font-bold text-foreground">Categorias</h2>
           </motion.div>
 
-          {categoriesLoading ? (
+          {categoriesLoading && displayCategories.length === 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[...Array(4)].map((_, i) => (
                 <Skeleton key={i} className="h-[160px] rounded-2xl shimmer" />
               ))}
             </div>
-          ) : categories && categories.length > 0 ? (
+          ) : displayCategories.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-stretch">
-              {categories.map((category, index) => (
+              {displayCategories.map((category, index) => (
                 <CategoryCard
-                  key={category.id}
+                  key={category.id || category.slug}
                   name={category.name}
                   slug={category.slug}
                   icon={category.icon}
@@ -103,12 +139,9 @@ const Index = () => {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <CategoryCard name="Celular" slug="celular" icon="smartphone" index={0} />
-              <CategoryCard name="Computador" slug="computador" icon="monitor" index={1} />
-              <CategoryCard name="Internet" slug="internet" icon="wifi" index={2} />
-              <CategoryCard name="Aplicativos" slug="aplicativos" icon="app-window" index={3} />
-            </div>
+            <p className="text-muted-foreground text-center py-8">
+              Nenhuma categoria disponível para este nicho.
+            </p>
           )}
         </div>
       </section>
@@ -190,7 +223,7 @@ const Index = () => {
       </section>
 
       {/* Featured Content */}
-      {featuredProblems && featuredProblems.length > 0 && (
+      {nicheFeatured.length > 0 && (
         <section className="py-12 px-4">
           <div className="container">
             <motion.div
@@ -205,7 +238,7 @@ const Index = () => {
               <h2 className="text-2xl md:text-3xl font-bold text-foreground">Conteúdo em destaque</h2>
             </motion.div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {featuredProblems.map((problem, index) => (
+              {nicheFeatured.map((problem, index) => (
                 <ProblemCard key={problem.id} problem={problem} showCategory index={index} />
               ))}
             </div>

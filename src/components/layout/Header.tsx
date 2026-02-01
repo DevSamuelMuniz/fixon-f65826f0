@@ -1,26 +1,63 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Search, Home, Smartphone, Monitor, Wifi, AppWindow, Info, Mail, MessageCircle, Sparkles, User, LogOut } from 'lucide-react';
+import { Menu, X, Search, Home, Info, Mail, MessageCircle, Sparkles, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/useAuth';
+import { useNiche } from '@/contexts/NicheContext';
 import { toast } from 'sonner';
+import * as LucideIcons from 'lucide-react';
+
+// Dynamic icon resolver
+function getIconComponent(iconName: string) {
+  const iconMap: Record<string, any> = {
+    'smartphone': LucideIcons.Smartphone,
+    'monitor': LucideIcons.Monitor,
+    'wifi': LucideIcons.Wifi,
+    'app-window': LucideIcons.AppWindow,
+    'heart-pulse': LucideIcons.HeartPulse,
+    'apple': LucideIcons.Apple,
+    'sparkles': LucideIcons.Sparkles,
+    'moon': LucideIcons.Moon,
+    'cog': LucideIcons.Cog,
+    'zap': LucideIcons.Zap,
+    'circle-stop': LucideIcons.CircleStop,
+    'circle': LucideIcons.Circle,
+    'droplets': LucideIcons.Droplets,
+    'paintbrush': LucideIcons.Paintbrush,
+    'armchair': LucideIcons.Armchair,
+  };
+  return iconMap[iconName] || LucideIcons.Folder;
+}
 
 export function Header() {
   const [open, setOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const { niche } = useNiche();
 
-  const menuItems = [
-    { label: 'Início', href: '/', icon: Home },
-    { label: 'Celular', href: '/celular', icon: Smartphone },
-    { label: 'Computador', href: '/computador', icon: Monitor },
-    { label: 'Internet', href: '/internet', icon: Wifi },
-    { label: 'Aplicativos', href: '/aplicativos', icon: AppWindow },
-    { label: 'Sobre', href: '/sobre', icon: Info },
-    { label: 'Contato', href: '/contato', icon: Mail },
-  ];
+  // Generate menu items dynamically based on niche categories
+  const menuItems = useMemo(() => {
+    const baseItems = [
+      { label: 'Início', href: '/', icon: Home },
+    ];
+    
+    // Add niche-specific category items
+    const categoryItems = niche.categories.map(category => ({
+      label: category.name,
+      href: `/${category.slug}`,
+      icon: getIconComponent(category.icon),
+    }));
+    
+    // Add static items at the end
+    const staticItems = [
+      { label: 'Sobre', href: '/sobre', icon: Info },
+      { label: 'Contato', href: '/contato', icon: Mail },
+    ];
+    
+    return [...baseItems, ...categoryItems, ...staticItems];
+  }, [niche]);
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -39,10 +76,15 @@ export function Header() {
           <motion.img
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            alt="Fix-on"
+            alt={niche.displayName}
             className="h-10 w-auto"
             src="/lovable-uploads/81ef09f8-7ff1-4caa-9855-b8433a225488.png"
           />
+          {niche.slug !== 'default' && niche.slug !== 'tech' && (
+            <span className="hidden sm:inline-block px-2 py-0.5 text-xs font-semibold bg-primary/10 text-primary rounded-full">
+              {niche.name}
+            </span>
+          )}
         </Link>
 
         {/* Center: Desktop Navigation */}
@@ -145,9 +187,14 @@ export function Header() {
                   <Link to="/" onClick={() => setOpen(false)} className="flex items-center gap-2 min-h-0 min-w-0">
                     <img
                       src="/lovable-uploads/81ef09f8-7ff1-4caa-9855-b8433a225488.png"
-                      alt="Fix-on"
+                      alt={niche.displayName}
                       className="h-8 w-auto"
                     />
+                    {niche.slug !== 'default' && niche.slug !== 'tech' && (
+                      <span className="px-2 py-0.5 text-xs font-semibold bg-primary/10 text-primary rounded-full">
+                        {niche.name}
+                      </span>
+                    )}
                   </Link>
                 </div>
                 
