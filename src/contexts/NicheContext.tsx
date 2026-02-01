@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
-import { NicheConfig, detectNicheFromHost, defaultNiche } from '@/config/niches';
+import { NicheConfig, detectNicheFromHost, defaultNiche, getNicheBySlug } from '@/config/niches';
 
 interface NicheContextValue {
   niche: NicheConfig;
@@ -19,7 +19,6 @@ export function NicheProvider({ children, overrideNiche }: NicheProviderProps) {
   
   const niche = useMemo(() => {
     if (overrideNiche) {
-      const { getNicheBySlug } = require('@/config/niches');
       return getNicheBySlug(overrideNiche) || defaultNiche;
     }
     
