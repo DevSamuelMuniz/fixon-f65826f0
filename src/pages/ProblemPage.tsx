@@ -12,6 +12,7 @@ import { useProblemBySlug, useProblems, useIncrementViewCount } from '@/hooks/us
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { AdInArticle, AdSidebar } from '@/components/ads';
 
 export default function ProblemPage() {
   const { categorySlug, problemSlug } = useParams<{ categorySlug: string; problemSlug: string }>();
@@ -147,94 +148,108 @@ export default function ProblemPage() {
 
       {/* Content */}
       <div className="container px-4 py-8">
-        {/* Quick Answer */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="p-5 md:p-6 bg-primary/5 border border-primary/20 rounded-2xl mb-8 relative overflow-hidden"
-        >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16" />
-          <h2 className="text-sm font-semibold text-primary uppercase tracking-wide mb-2 relative z-10">
-            💡 Resposta rápida
-          </h2>
-          <p className="text-lg text-foreground relative z-10">{problem.quick_answer}</p>
-        </motion.div>
+        <div className="flex gap-8">
+          {/* Main Content */}
+          <div className="flex-1 min-w-0">
+            {/* Quick Answer */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="p-5 md:p-6 bg-primary/5 border border-primary/20 rounded-2xl mb-8 relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16" />
+              <h2 className="text-sm font-semibold text-primary uppercase tracking-wide mb-2 relative z-10">
+                💡 Resposta rápida
+              </h2>
+              <p className="text-lg text-foreground relative z-10">{problem.quick_answer}</p>
+            </motion.div>
 
-        {/* Warnings */}
-        <WarningBox warnings={problem.warnings} className="mb-8" />
+            {/* Ad after Quick Answer */}
+            <AdInArticle />
 
-        {/* Steps */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <ProgressChecklist steps={problem.steps} />
-        </motion.div>
+            {/* Warnings */}
+            <WarningBox warnings={problem.warnings} className="mb-8" />
 
-        {/* Tags */}
-        {problem.tags && problem.tags.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="mt-8 pt-8 border-t border-border"
-          >
-            <h3 className="text-sm font-semibold text-muted-foreground mb-3">Tags</h3>
-            <div className="flex flex-wrap gap-2">
-              {problem.tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1 bg-muted text-muted-foreground text-sm rounded-full hover:bg-muted/80 transition-colors"
-                >
-                  #{tag}
-                </span>
-              ))}
-            </div>
-          </motion.div>
-        )}
+            {/* Steps */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <ProgressChecklist steps={problem.steps} />
+            </motion.div>
 
-        {/* Feedback */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mt-10"
-        >
-          <FeedbackButtons problemId={problem.id} />
-        </motion.div>
+            {/* Ad after Steps */}
+            <AdInArticle />
 
-        {/* Related Problems */}
-        {filteredRelated.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="mt-12"
-          >
-            <h2 className="text-xl font-bold text-foreground mb-4">Problemas relacionados</h2>
-            <div className="space-y-4">
-              {filteredRelated.map((relatedProblem, index) => (
-                <ProblemCard key={relatedProblem.id} problem={relatedProblem} index={index} />
-              ))}
-            </div>
-          </motion.div>
-        )}
+            {/* Tags */}
+            {problem.tags && problem.tags.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="mt-8 pt-8 border-t border-border"
+              >
+                <h3 className="text-sm font-semibold text-muted-foreground mb-3">Tags</h3>
+                <div className="flex flex-wrap gap-2">
+                  {problem.tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 bg-muted text-muted-foreground text-sm rounded-full hover:bg-muted/80 transition-colors"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
+            )}
 
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="mt-12 text-center"
-        >
-          <Link to={`/${categorySlug}`}>
-            <Button variant="outline" size="lg">
-              Ver outras soluções de {problem.category?.name}
-            </Button>
-          </Link>
-        </motion.div>
+            {/* Feedback */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="mt-10"
+            >
+              <FeedbackButtons problemId={problem.id} />
+            </motion.div>
+
+            {/* Related Problems */}
+            {filteredRelated.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="mt-12"
+              >
+                <h2 className="text-xl font-bold text-foreground mb-4">Problemas relacionados</h2>
+                <div className="space-y-4">
+                  {filteredRelated.map((relatedProblem, index) => (
+                    <ProblemCard key={relatedProblem.id} problem={relatedProblem} index={index} />
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* CTA */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="mt-12 text-center"
+            >
+              <Link to={`/${categorySlug}`}>
+                <Button variant="outline" size="lg">
+                  Ver outras soluções de {problem.category?.name}
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
+
+          {/* Sidebar Ad (Desktop only) */}
+          <AdSidebar className="flex-shrink-0" />
+        </div>
       </div>
     </Layout>
   );

@@ -13,7 +13,7 @@ import { useCategories } from '@/hooks/useCategories';
 import { useFeaturedProblems, useProblems } from '@/hooks/useProblems';
 import { useNiche } from '@/contexts/NicheContext';
 import { Skeleton } from '@/components/ui/skeleton';
-
+import { AdBanner, AdInArticle } from '@/components/ads';
 const Index = () => {
   const { niche, nicheSlug } = useNiche();
   const { data: categories, isLoading: categoriesLoading } = useCategories();
@@ -142,9 +142,12 @@ const Index = () => {
             <p className="text-muted-foreground text-center py-8">
               Nenhuma categoria disponível para este nicho.
             </p>
-          )}
+        )}
         </div>
       </section>
+
+      {/* Ad Banner after Categories */}
+      <AdBanner className="bg-muted/10" />
 
       {/* Popular Problems Section */}
       <section className="py-12 px-4 bg-muted/20">
@@ -180,6 +183,11 @@ const Index = () => {
           )}
         </div>
       </section>
+
+      {/* Ad In-Article before How It Works */}
+      <div className="container px-4">
+        <AdInArticle />
+      </div>
 
       {/* How It Works */}
       <HowItWorks />

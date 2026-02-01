@@ -1,3 +1,4 @@
+import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ChevronLeft } from 'lucide-react';
@@ -10,6 +11,7 @@ import { useCategoryBySlug } from '@/hooks/useCategories';
 import { useProblems } from '@/hooks/useProblems';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { AdBanner, AdInFeed } from '@/components/ads';
 
 export default function CategoryPage() {
   const { categorySlug } = useParams<{ categorySlug: string }>();
@@ -84,7 +86,13 @@ export default function CategoryPage() {
         ) : problems && problems.length > 0 ? (
           <div className="space-y-4">
             {problems.map((problem, index) => (
-              <ProblemCard key={problem.id} problem={problem} index={index} />
+              <React.Fragment key={problem.id}>
+                <ProblemCard problem={problem} index={index} />
+                {/* Show ad after every 3 problems */}
+                {(index + 1) % 3 === 0 && index < problems.length - 1 && (
+                  <AdInFeed />
+                )}
+              </React.Fragment>
             ))}
           </div>
         ) : (
@@ -94,6 +102,11 @@ export default function CategoryPage() {
             description="Esta categoria ainda não possui problemas cadastrados."
             showHomeButton={false}
           />
+        )}
+
+        {/* Ad Banner at the end */}
+        {problems && problems.length > 0 && (
+          <AdBanner className="mt-8" />
         )}
       </div>
     </Layout>
