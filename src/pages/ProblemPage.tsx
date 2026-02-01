@@ -1,10 +1,13 @@
 import { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ChevronLeft, Share2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ChevronLeft, Share2, Eye, Calendar } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
-import { StepByStep } from '@/components/StepByStep';
+import { ProgressChecklist } from '@/components/ProgressChecklist';
 import { WarningBox } from '@/components/WarningBox';
 import { ProblemCard } from '@/components/ProblemCard';
+import { FeedbackButtons } from '@/components/FeedbackButtons';
+import { EmptyState } from '@/components/EmptyState';
 import { useProblemBySlug, useProblems, useIncrementViewCount } from '@/hooks/useProblems';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -28,7 +31,6 @@ export default function ProblemPage() {
   useEffect(() => {
     if (problem) {
       document.title = `${problem.title} - Fix-on`;
-      // Update meta description
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) {
         metaDesc.setAttribute('content', problem.meta_description || problem.quick_answer);
@@ -66,10 +68,10 @@ export default function ProblemPage() {
     return (
       <Layout>
         <div className="container px-4 py-8">
-          <Skeleton className="h-6 w-24 mb-4" />
-          <Skeleton className="h-10 w-full mb-4" />
-          <Skeleton className="h-24 w-full mb-6" />
-          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-6 w-24 mb-4 shimmer" />
+          <Skeleton className="h-10 w-full mb-4 shimmer" />
+          <Skeleton className="h-24 w-full mb-6 shimmer" />
+          <Skeleton className="h-48 w-full shimmer" />
         </div>
       </Layout>
     );
@@ -78,28 +80,34 @@ export default function ProblemPage() {
   if (!problem) {
     return (
       <Layout>
-        <div className="container px-4 py-16 text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">Problema não encontrado</h1>
-          <p className="text-muted-foreground mb-6">
-            O problema que você está procurando não existe ou foi removido.
-          </p>
-          <Link to="/">
-            <Button>Voltar ao início</Button>
-          </Link>
-        </div>
+        <EmptyState
+          type="notFound"
+          title="Problema não encontrado"
+          description="O problema que você está procurando não existe ou foi removido."
+        />
       </Layout>
     );
   }
 
+  const formattedDate = new Date(problem.created_at).toLocaleDateString('pt-BR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
   return (
     <Layout>
       {/* Header */}
-      <div className="border-b border-border bg-muted/30">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="border-b border-border bg-gradient-to-br from-muted/50 to-transparent"
+      >
         <div className="container px-4 py-6">
           <div className="flex items-center justify-between mb-4">
             <Link
               to={`/${categorySlug}`}
-              className="inline-flex items-center text-sm text-muted-foreground hover:text-primary min-h-0 min-w-0"
+              className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors min-h-0 min-w-0"
             >
               <ChevronLeft className="h-4 w-4 mr-1" />
               {problem.category?.name || 'Voltar'}
@@ -114,65 +122,119 @@ export default function ProblemPage() {
               Compartilhar
             </Button>
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-2xl md:text-3xl font-bold text-foreground mb-4"
+          >
             {problem.title}
-          </h1>
+          </motion.h1>
+
+          {/* Meta info */}
+          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+            <span className="inline-flex items-center gap-1">
+              <Eye className="h-4 w-4" />
+              {problem.view_count} visualizações
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Calendar className="h-4 w-4" />
+              {formattedDate}
+            </span>
+          </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Content */}
       <div className="container px-4 py-8">
         {/* Quick Answer */}
-        <div className="p-4 md:p-6 bg-primary/5 border border-primary/20 rounded-xl mb-8">
-          <h2 className="text-sm font-semibold text-primary uppercase tracking-wide mb-2">
-            Resposta rápida
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="p-5 md:p-6 bg-primary/5 border border-primary/20 rounded-2xl mb-8 relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16" />
+          <h2 className="text-sm font-semibold text-primary uppercase tracking-wide mb-2 relative z-10">
+            💡 Resposta rápida
           </h2>
-          <p className="text-lg text-foreground">{problem.quick_answer}</p>
-        </div>
+          <p className="text-lg text-foreground relative z-10">{problem.quick_answer}</p>
+        </motion.div>
 
         {/* Warnings */}
         <WarningBox warnings={problem.warnings} className="mb-8" />
 
         {/* Steps */}
-        <StepByStep steps={problem.steps} />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <ProgressChecklist steps={problem.steps} />
+        </motion.div>
 
         {/* Tags */}
         {problem.tags && problem.tags.length > 0 && (
-          <div className="mt-8 pt-8 border-t border-border">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="mt-8 pt-8 border-t border-border"
+          >
             <h3 className="text-sm font-semibold text-muted-foreground mb-3">Tags</h3>
             <div className="flex flex-wrap gap-2">
               {problem.tags.map((tag, index) => (
                 <span
                   key={index}
-                  className="px-3 py-1 bg-muted text-muted-foreground text-sm rounded-full"
+                  className="px-3 py-1 bg-muted text-muted-foreground text-sm rounded-full hover:bg-muted/80 transition-colors"
                 >
-                  {tag}
+                  #{tag}
                 </span>
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
+
+        {/* Feedback */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mt-10"
+        >
+          <FeedbackButtons problemId={problem.id} />
+        </motion.div>
 
         {/* Related Problems */}
         {filteredRelated.length > 0 && (
-          <div className="mt-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mt-12"
+          >
             <h2 className="text-xl font-bold text-foreground mb-4">Problemas relacionados</h2>
             <div className="space-y-4">
-              {filteredRelated.map((relatedProblem) => (
-                <ProblemCard key={relatedProblem.id} problem={relatedProblem} />
+              {filteredRelated.map((relatedProblem, index) => (
+                <ProblemCard key={relatedProblem.id} problem={relatedProblem} index={index} />
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* CTA */}
-        <div className="mt-12 text-center">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="mt-12 text-center"
+        >
           <Link to={`/${categorySlug}`}>
             <Button variant="outline" size="lg">
               Ver outras soluções de {problem.category?.name}
             </Button>
           </Link>
-        </div>
+        </motion.div>
       </div>
     </Layout>
   );

@@ -52,6 +52,10 @@
     --shadow-md: 0 4px 6px -1px hsl(220 20% 10% / 0.1);
     --shadow-lg: 0 10px 15px -3px hsl(220 20% 10% / 0.1);
 
+    /* Glassmorphism */
+    --glass-bg: hsl(0 0% 100% / 0.7);
+    --glass-border: hsl(220 13% 91% / 0.5);
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 217 91% 60%;
@@ -91,6 +95,9 @@
     --input: 220 20% 20%;
     --ring: 217 91% 60%;
 
+    --glass-bg: hsl(220 20% 14% / 0.7);
+    --glass-border: hsl(220 20% 20% / 0.5);
+
     --sidebar-background: 220 20% 10%;
     --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 217 91% 60%;
@@ -126,4 +133,94 @@
   .touch-action-manipulation {
     touch-action: manipulation;
   }
+
+  /* Glassmorphism */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+  }
+
+  /* Gradient backgrounds */
+  .gradient-hero {
+    background: linear-gradient(135deg, hsl(217 91% 60% / 0.05) 0%, hsl(263 70% 50% / 0.05) 100%);
+  }
+
+  .gradient-celular {
+    background: linear-gradient(135deg, hsl(217 91% 60% / 0.1) 0%, hsl(217 91% 60% / 0.05) 100%);
+  }
+
+  .gradient-computador {
+    background: linear-gradient(135deg, hsl(142 76% 36% / 0.1) 0%, hsl(142 76% 36% / 0.05) 100%);
+  }
+
+  .gradient-internet {
+    background: linear-gradient(135deg, hsl(263 70% 50% / 0.1) 0%, hsl(263 70% 50% / 0.05) 100%);
+  }
+
+  .gradient-aplicativos {
+    background: linear-gradient(135deg, hsl(25 95% 53% / 0.1) 0%, hsl(25 95% 53% / 0.05) 100%);
+  }
+
+  /* Glow effects */
+  .glow-primary {
+    box-shadow: 0 0 20px hsl(217 91% 60% / 0.3);
+  }
+
+  /* Animated gradient border */
+  .gradient-border {
+    position: relative;
+    background: linear-gradient(var(--background), var(--background)) padding-box,
+                linear-gradient(135deg, hsl(217 91% 60%), hsl(263 70% 50%)) border-box;
+    border: 2px solid transparent;
+  }
+
+  /* Shimmer effect for loading states */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 25%,
+      hsl(var(--muted-foreground) / 0.1) 50%,
+      hsl(var(--muted)) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+}
+
+/* Custom animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px hsl(217 91% 60% / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px hsl(217 91% 60% / 0.5);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
 }
