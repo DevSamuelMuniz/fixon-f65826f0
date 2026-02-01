@@ -1,17 +1,14 @@
 import { Link } from 'react-router-dom';
 import logo from '@/assets/logo.png';
-
 export function Footer() {
   const currentYear = new Date().getFullYear();
-
-  return (
-    <footer className="border-t border-border bg-muted/30">
+  return <footer className="border-t border-border bg-muted/30">
       <div className="container px-4 py-8">
         {/* Logo and Description */}
         <div className="flex flex-col items-center text-center mb-8">
           <Link to="/" className="flex items-center gap-2 mb-3 min-h-0 min-w-0">
-            <img src={logo} alt="Fix-on" className="h-8 w-8" />
-            <span className="text-xl font-bold text-foreground">Fix-on</span>
+            <img alt="Fix-on" className="h-full w-20" src="/lovable-uploads/29378dcb-691e-4fdd-ac92-4722a2b25bed.png" />
+            
           </Link>
           <p className="text-sm text-muted-foreground max-w-xs">
             Soluções rápidas para seus problemas de tecnologia.
@@ -79,6 +76,5 @@ export function Footer() {
           </p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 }
