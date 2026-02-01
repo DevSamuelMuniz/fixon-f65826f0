@@ -34,16 +34,38 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4">
-        {/* Left side: Logo + Forum */}
-        <div className="flex items-center gap-4">
-          <Link to="/" className="flex items-center gap-2 min-h-0 min-w-0">
-            <motion.img
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              alt="Fix-on"
-              className="h-10 w-auto"
-              src="/lovable-uploads/81ef09f8-7ff1-4caa-9855-b8433a225488.png"
-            />
+        {/* Left side: Logo */}
+        <Link to="/" className="flex items-center gap-2 min-h-0 min-w-0">
+          <motion.img
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            alt="Fix-on"
+            className="h-10 w-auto"
+            src="/lovable-uploads/81ef09f8-7ff1-4caa-9855-b8433a225488.png"
+          />
+        </Link>
+
+        {/* Center: Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-1">
+          {menuItems.slice(1, 5).map((item) => (
+            <Link
+              key={item.href}
+              to={item.href}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-lg transition-all min-h-0 min-w-0"
+            >
+              <item.icon className="h-4 w-4" />
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Right side: Search + Forum + User + Mobile Menu */}
+        <div className="flex items-center gap-2">
+          <Link to="/buscar">
+            <Button variant="ghost" size="icon" className="min-h-10 min-w-10 hover:bg-primary/10">
+              <Search className="h-5 w-5" />
+              <span className="sr-only">Buscar</span>
+            </Button>
           </Link>
 
           {/* Highlighted Forum Link - Desktop */}
@@ -60,30 +82,6 @@ export function Header() {
                 Novo
               </span>
             </motion.div>
-          </Link>
-        </div>
-
-        {/* Center: Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-1">
-          {menuItems.slice(1, 5).map((item) => (
-            <Link
-              key={item.href}
-              to={item.href}
-              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-lg transition-all min-h-0 min-w-0"
-            >
-              <item.icon className="h-4 w-4" />
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        {/* Right side: Search + User + Mobile Menu */}
-        <div className="flex items-center gap-2">
-          <Link to="/buscar">
-            <Button variant="ghost" size="icon" className="min-h-10 min-w-10 hover:bg-primary/10">
-              <Search className="h-5 w-5" />
-              <span className="sr-only">Buscar</span>
-            </Button>
           </Link>
 
           {/* User Menu */}
