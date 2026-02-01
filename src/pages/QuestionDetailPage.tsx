@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
-  ArrowLeft, MessageCircle, Clock, User, ThumbsUp, 
-  CheckCircle2, Send, Shield, FileText, HelpCircle 
+  ArrowLeft, MessageCircle, Clock, ThumbsUp, 
+  CheckCircle2, Send, FileText, HelpCircle, Sparkles
 } from 'lucide-react';
 import { z } from 'zod';
 import { Layout } from '@/components/layout/Layout';
@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/EmptyState';
+import { UserAvatar } from '@/components/UserAvatar';
 import { useToast } from '@/hooks/use-toast';
 import { useForumQuestion, useCreateAnswer, useToggleUpvote, useUserUpvotes, useMarkAsSolution, useConvertToProblem } from '@/hooks/useForum';
 import { useCategories } from '@/hooks/useCategories';
@@ -40,10 +41,32 @@ const answerSchema = z.object({
 });
 
 const statusConfig = {
-  open: { label: 'Aberta', color: 'bg-blue-500/10 text-blue-500', icon: HelpCircle },
-  resolved: { label: 'Resolvida', color: 'bg-green-500/10 text-green-500', icon: CheckCircle2 },
-  converted: { label: 'Artigo criado', color: 'bg-purple-500/10 text-purple-500', icon: FileText },
+  open: { label: 'Aberta', color: 'bg-blue-500/10 text-blue-500 border-blue-500/20', icon: HelpCircle },
+  resolved: { label: 'Resolvida', color: 'bg-green-500/10 text-green-500 border-green-500/20', icon: CheckCircle2 },
+  converted: { label: 'Artigo criado', color: 'bg-purple-500/10 text-purple-500 border-purple-500/20', icon: FileText },
 };
+
+function formatDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString('pt-BR', { 
+    day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+}
+
+function formatTimeAgo(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'agora';
+  if (diffMins < 60) return `há ${diffMins} min`;
+  if (diffHours < 24) return `há ${diffHours}h`;
+  if (diffDays < 7) return `há ${diffDays} dias`;
+  
+  return date.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' });
+}
 
 export default function QuestionDetailPage() {
   const { questionId } = useParams<{ questionId: string }>();
@@ -134,7 +157,13 @@ export default function QuestionDetailPage() {
       <Layout>
         <div className="container max-w-3xl px-4 py-8">
           <Skeleton className="h-6 w-32 mb-6 shimmer" />
-          <Skeleton className="h-10 w-full mb-4 shimmer" />
+          <div className="flex gap-4 mb-6">
+            <Skeleton className="h-12 w-12 rounded-full shimmer" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-8 w-3/4 shimmer" />
+              <Skeleton className="h-4 w-1/2 shimmer" />
+            </div>
+          </div>
           <Skeleton className="h-32 w-full mb-8 shimmer" />
           <Skeleton className="h-24 w-full shimmer" />
         </div>
@@ -168,47 +197,55 @@ export default function QuestionDetailPage() {
           Voltar ao fórum
         </Link>
 
-        {/* Question */}
+        {/* Question Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-8 p-6 bg-card border border-border rounded-2xl"
         >
+          {/* Author Header */}
           <div className="flex items-start gap-4 mb-4">
-            <div className={cn('p-3 rounded-xl flex-shrink-0', status?.color)}>
-              <StatusIcon className="h-6 w-6" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <h1 className="text-2xl font-bold text-foreground">{question.title}</h1>
-                <span className={cn('flex-shrink-0 px-3 py-1 rounded-full text-sm font-medium', status?.color)}>
+            <UserAvatar 
+              name={question.author_name} 
+              size="lg"
+              className="flex-shrink-0"
+            />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-semibold text-foreground">
+                  {question.author_name || 'Anônimo'}
+                </span>
+                <span className={cn(
+                  'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border',
+                  status?.color
+                )}>
+                  <StatusIcon className="h-3 w-3" />
                   {status?.label}
                 </span>
               </div>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  {new Date(question.created_at).toLocaleDateString('pt-BR', { 
-                    day: 'numeric', month: 'long', year: 'numeric' 
-                  })}
+                  <Clock className="h-3.5 w-3.5" />
+                  {formatDate(question.created_at)}
                 </span>
-                {question.author_name && (
-                  <span className="flex items-center gap-1">
-                    <User className="h-4 w-4" />
-                    {question.author_name}
-                  </span>
-                )}
               </div>
             </div>
           </div>
+
+          {/* Question Content */}
+          <h1 className="text-xl md:text-2xl font-bold text-foreground mb-4 leading-tight">
+            {question.title}
+          </h1>
           
-          <div className="p-4 bg-muted/50 rounded-xl">
-            <p className="text-foreground whitespace-pre-wrap">{question.description}</p>
+          <div className="prose prose-sm max-w-none">
+            <p className="text-foreground/90 whitespace-pre-wrap leading-relaxed">
+              {question.description}
+            </p>
           </div>
 
           {/* Admin Actions */}
           {isAdmin && question.status !== 'converted' && (
-            <div className="flex gap-2 mt-4">
+            <div className="flex gap-2 mt-6 pt-4 border-t border-border">
               <Button
                 variant="outline"
                 size="sm"
@@ -222,63 +259,86 @@ export default function QuestionDetailPage() {
           )}
         </motion.div>
 
-        {/* Answers */}
+        {/* Answers Section */}
         <div className="mb-8">
           <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-            <MessageCircle className="h-5 w-5" />
+            <MessageCircle className="h-5 w-5 text-primary" />
             {question.answer_count} {question.answer_count === 1 ? 'Resposta' : 'Respostas'}
           </h2>
 
           {question.answers && question.answers.length > 0 ? (
             <div className="space-y-4">
-              {question.answers.map((answer, index) => {
-                const isUpvoted = userUpvotes?.includes(answer.id);
-                
-                return (
-                  <motion.div
-                    key={answer.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className={cn(
-                      'p-4 rounded-xl border',
-                      answer.is_solution 
-                        ? 'bg-green-500/5 border-green-500/30' 
-                        : 'bg-card border-border'
-                    )}
-                  >
-                    {answer.is_solution && (
-                      <div className="flex items-center gap-2 text-green-600 text-sm font-medium mb-3">
-                        <CheckCircle2 className="h-4 w-4" />
-                        Melhor resposta
-                      </div>
-                    )}
-                    
-                    <p className="text-foreground whitespace-pre-wrap mb-4">{answer.content}</p>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3.5 w-3.5" />
-                          {new Date(answer.created_at).toLocaleDateString('pt-BR')}
-                        </span>
-                        {answer.author_name && (
-                          <span>{answer.author_name}</span>
-                        )}
+              {/* Sort: solution first, then by upvotes */}
+              {[...question.answers]
+                .sort((a, b) => {
+                  if (a.is_solution && !b.is_solution) return -1;
+                  if (!a.is_solution && b.is_solution) return 1;
+                  return b.upvote_count - a.upvote_count;
+                })
+                .map((answer, index) => {
+                  const isUpvoted = userUpvotes?.includes(answer.id);
+                  
+                  return (
+                    <motion.div
+                      key={answer.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className={cn(
+                        'relative p-5 rounded-xl border transition-all',
+                        answer.is_solution 
+                          ? 'bg-green-500/5 border-green-500/30 ring-1 ring-green-500/20' 
+                          : 'bg-card border-border hover:border-border/80'
+                      )}
+                    >
+                      {/* Solution Badge */}
+                      {answer.is_solution && (
+                        <div className="absolute -top-3 left-4 flex items-center gap-1.5 px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full shadow-lg">
+                          <Sparkles className="h-3 w-3" />
+                          Melhor resposta
+                        </div>
+                      )}
+                      
+                      {/* Author Info */}
+                      <div className="flex items-start gap-3 mb-3">
+                        <UserAvatar 
+                          name={answer.author_name} 
+                          size="sm"
+                          className="flex-shrink-0 mt-0.5"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-foreground text-sm">
+                              {answer.author_name || 'Anônimo'}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {formatTimeAgo(answer.created_at)}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                       
-                      <div className="flex items-center gap-2">
+                      {/* Answer Content */}
+                      <p className="text-foreground/90 whitespace-pre-wrap leading-relaxed mb-4 pl-11">
+                        {answer.content}
+                      </p>
+                      
+                      {/* Actions */}
+                      <div className="flex items-center justify-between pl-11">
                         <Button
-                          variant="ghost"
+                          variant={isUpvoted ? "default" : "ghost"}
                           size="sm"
                           onClick={() => handleUpvote(answer.id)}
                           className={cn(
-                            'gap-1 min-h-8 min-w-8',
-                            isUpvoted && 'text-primary'
+                            'gap-1.5 h-8 px-3',
+                            isUpvoted 
+                              ? 'bg-primary/10 text-primary hover:bg-primary/20' 
+                              : 'text-muted-foreground hover:text-foreground'
                           )}
                         >
                           <ThumbsUp className={cn('h-4 w-4', isUpvoted && 'fill-current')} />
-                          {answer.upvote_count}
+                          <span className="font-medium">{answer.upvote_count}</span>
+                          <span className="hidden sm:inline">útil</span>
                         </Button>
                         
                         {isAdmin && !answer.is_solution && question.status === 'open' && (
@@ -286,22 +346,22 @@ export default function QuestionDetailPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleMarkSolution(answer.id)}
-                            className="gap-1 min-h-8"
+                            className="gap-1.5 h-8 text-green-600 border-green-500/30 hover:bg-green-500/10"
                           >
                             <CheckCircle2 className="h-4 w-4" />
                             Marcar solução
                           </Button>
                         )}
                       </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
+                    </motion.div>
+                  );
+                })}
             </div>
           ) : (
-            <div className="text-center py-8 bg-muted/30 rounded-xl">
-              <MessageCircle className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
-              <p className="text-muted-foreground">Nenhuma resposta ainda. Seja o primeiro!</p>
+            <div className="text-center py-12 bg-muted/30 rounded-xl border border-dashed border-border">
+              <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground font-medium">Nenhuma resposta ainda</p>
+              <p className="text-sm text-muted-foreground mt-1">Seja o primeiro a ajudar!</p>
             </div>
           )}
         </div>
@@ -311,29 +371,32 @@ export default function QuestionDetailPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="p-6 bg-card border border-border rounded-xl"
+          className="p-6 bg-card border border-border rounded-2xl"
         >
           <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
-            <Send className="h-5 w-5" />
+            <Send className="h-5 w-5 text-primary" />
             Sua resposta
           </h3>
           
           <form onSubmit={handleSubmitAnswer} className="space-y-4">
             <div className="space-y-2">
               <Textarea
-                placeholder="Compartilhe sua solução ou dica..."
+                placeholder="Compartilhe sua solução ou dica para ajudar..."
                 value={answerForm.content}
                 onChange={(e) => setAnswerForm(prev => ({ ...prev, content: e.target.value }))}
-                className={`min-h-[120px] ${errors.content ? 'border-destructive' : ''}`}
+                className={cn(
+                  'min-h-[120px] resize-none',
+                  errors.content && 'border-destructive focus-visible:ring-destructive'
+                )}
               />
               {errors.content && (
                 <p className="text-sm text-destructive">{errors.content}</p>
               )}
             </div>
             
-            <div className="flex gap-4 items-end">
+            <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-end">
               <div className="flex-1 space-y-2">
-                <Label htmlFor="answer_name" className="text-sm">
+                <Label htmlFor="answer_name" className="text-sm text-muted-foreground">
                   Seu nome (opcional)
                 </Label>
                 <Input
@@ -343,9 +406,13 @@ export default function QuestionDetailPage() {
                   onChange={(e) => setAnswerForm(prev => ({ ...prev, author_name: e.target.value }))}
                 />
               </div>
-              <Button type="submit" disabled={createAnswer.isPending} className="gap-2">
+              <Button 
+                type="submit" 
+                disabled={createAnswer.isPending} 
+                className="gap-2 h-10 px-6"
+              >
                 <Send className="h-4 w-4" />
-                {createAnswer.isPending ? 'Enviando...' : 'Enviar'}
+                {createAnswer.isPending ? 'Enviando...' : 'Enviar resposta'}
               </Button>
             </div>
           </form>

@@ -6,16 +6,33 @@ import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { UserAvatar } from '@/components/UserAvatar';
 import { useForumQuestions } from '@/hooks/useForum';
 import { cn } from '@/lib/utils';
 import { AdInFeed } from '@/components/ads';
 import React from 'react';
 
 const statusConfig = {
-  open: { label: 'Aberta', color: 'bg-blue-500/10 text-blue-500', icon: HelpCircle },
-  resolved: { label: 'Resolvida', color: 'bg-green-500/10 text-green-500', icon: CheckCircle2 },
-  converted: { label: 'Artigo criado', color: 'bg-purple-500/10 text-purple-500', icon: FileText },
+  open: { label: 'Aberta', color: 'bg-blue-500/10 text-blue-500 border-blue-500/20', icon: HelpCircle },
+  resolved: { label: 'Resolvida', color: 'bg-green-500/10 text-green-500 border-green-500/20', icon: CheckCircle2 },
+  converted: { label: 'Artigo criado', color: 'bg-purple-500/10 text-purple-500 border-purple-500/20', icon: FileText },
 };
+
+function formatTimeAgo(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'agora';
+  if (diffMins < 60) return `${diffMins}min`;
+  if (diffHours < 24) return `${diffHours}h`;
+  if (diffDays < 7) return `${diffDays}d`;
+  
+  return date.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' });
+}
 
 export default function ForumPage() {
   const [activeTab, setActiveTab] = useState<string>('all');
@@ -68,11 +85,18 @@ export default function ForumPage() {
               {isLoading ? (
                 <div className="space-y-4">
                   {[...Array(4)].map((_, i) => (
-                    <Skeleton key={i} className="h-28 rounded-xl shimmer" />
+                    <div key={i} className="flex gap-4 p-4 bg-card border border-border rounded-xl">
+                      <Skeleton className="h-10 w-10 rounded-full shimmer" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-5 w-3/4 shimmer" />
+                        <Skeleton className="h-4 w-full shimmer" />
+                        <Skeleton className="h-3 w-1/3 shimmer" />
+                      </div>
+                    </div>
                   ))}
                 </div>
               ) : questions && questions.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {questions.map((question, index) => {
                     const status = statusConfig[question.status as keyof typeof statusConfig];
                     const StatusIcon = status?.icon || HelpCircle;
@@ -86,38 +110,61 @@ export default function ForumPage() {
                         >
                           <Link
                             to={`/forum/${question.id}`}
-                            className="group flex gap-4 p-4 bg-card border border-border rounded-xl hover:border-primary/50 hover:shadow-lg transition-all"
+                            className="group block p-4 bg-card border border-border rounded-xl hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all"
                           >
-                            <div className={cn('flex-shrink-0 p-3 rounded-xl', status?.color)}>
-                              <StatusIcon className="h-6 w-6" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-2">
-                                <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                                  {question.title}
-                                </h3>
-                                <span className={cn('flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-medium', status?.color)}>
-                                  {status?.label}
-                                </span>
+                            <div className="flex gap-3">
+                              {/* Avatar */}
+                              <UserAvatar 
+                                name={question.author_name} 
+                                size="md"
+                                className="flex-shrink-0 mt-0.5"
+                              />
+                              
+                              {/* Content */}
+                              <div className="flex-1 min-w-0">
+                                {/* Header */}
+                                <div className="flex items-start justify-between gap-2 mb-1">
+                                  <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+                                    {question.title}
+                                  </h3>
+                                  <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 mt-0.5" />
+                                </div>
+                                
+                                {/* Description */}
+                                <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                                  {question.description}
+                                </p>
+                                
+                                {/* Footer */}
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+                                  {/* Author */}
+                                  <span className="font-medium text-foreground">
+                                    {question.author_name || 'Anônimo'}
+                                  </span>
+                                  
+                                  {/* Time */}
+                                  <span className="flex items-center gap-1 text-muted-foreground">
+                                    <Clock className="h-3 w-3" />
+                                    {formatTimeAgo(question.created_at)}
+                                  </span>
+                                  
+                                  {/* Answers */}
+                                  <span className="flex items-center gap-1 text-muted-foreground">
+                                    <MessageCircle className="h-3 w-3" />
+                                    {question.answer_count} {question.answer_count === 1 ? 'resposta' : 'respostas'}
+                                  </span>
+                                  
+                                  {/* Status Badge */}
+                                  <span className={cn(
+                                    'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border',
+                                    status?.color
+                                  )}>
+                                    <StatusIcon className="h-3 w-3" />
+                                    {status?.label}
+                                  </span>
+                                </div>
                               </div>
-                              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                                {question.description}
-                              </p>
-                              <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
-                                <span className="flex items-center gap-1">
-                                  <MessageCircle className="h-3.5 w-3.5" />
-                                  {question.answer_count} respostas
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <Clock className="h-3.5 w-3.5" />
-                                  {new Date(question.created_at).toLocaleDateString('pt-BR')}
-                                </span>
-                                {question.author_name && (
-                                  <span>por {question.author_name}</span>
-                                )}
-                              </div>
                             </div>
-                            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 self-center" />
                           </Link>
                         </motion.div>
                         {/* Show ad after every 5 questions */}
