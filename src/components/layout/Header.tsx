@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Search, Home, Smartphone, Monitor, Wifi, AppWindow, Info, Mail, MessageCircle, Sparkles } from 'lucide-react';
+import { Menu, X, Search, Home, Smartphone, Monitor, Wifi, AppWindow, Info, Mail, MessageCircle, Sparkles, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { cn } from '@/lib/utils';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   const menuItems = [
     { label: 'Início', href: '/', icon: Home },
@@ -19,35 +22,32 @@ export function Header() {
     { label: 'Contato', href: '/contato', icon: Mail },
   ];
 
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast.error('Erro ao sair');
+    } else {
+      toast.success('Você saiu da conta');
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 min-h-0 min-w-0">
-          <motion.img
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            alt="Fix-on"
-            className="h-10 w-auto"
-            src="/lovable-uploads/81ef09f8-7ff1-4caa-9855-b8433a225488.png"
-          />
-        </Link>
+        {/* Left side: Logo + Forum */}
+        <div className="flex items-center gap-4">
+          <Link to="/" className="flex items-center gap-2 min-h-0 min-w-0">
+            <motion.img
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              alt="Fix-on"
+              className="h-10 w-auto"
+              src="/lovable-uploads/81ef09f8-7ff1-4caa-9855-b8433a225488.png"
+            />
+          </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-1">
-          {menuItems.slice(1, 5).map((item) => (
-            <Link
-              key={item.href}
-              to={item.href}
-              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-lg transition-all min-h-0 min-w-0"
-            >
-              <item.icon className="h-4 w-4" />
-              {item.label}
-            </Link>
-          ))}
-          
-          {/* Highlighted Forum Link */}
-          <Link to="/forum">
+          {/* Highlighted Forum Link - Desktop */}
+          <Link to="/forum" className="hidden md:block">
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -61,9 +61,23 @@ export function Header() {
               </span>
             </motion.div>
           </Link>
+        </div>
+
+        {/* Center: Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-1">
+          {menuItems.slice(1, 5).map((item) => (
+            <Link
+              key={item.href}
+              to={item.href}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-lg transition-all min-h-0 min-w-0"
+            >
+              <item.icon className="h-4 w-4" />
+              {item.label}
+            </Link>
+          ))}
         </nav>
 
-        {/* Actions */}
+        {/* Right side: Search + User + Mobile Menu */}
         <div className="flex items-center gap-2">
           <Link to="/buscar">
             <Button variant="ghost" size="icon" className="min-h-10 min-w-10 hover:bg-primary/10">
@@ -71,6 +85,43 @@ export function Header() {
               <span className="sr-only">Buscar</span>
             </Button>
           </Link>
+
+          {/* User Menu */}
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="min-h-10 min-w-10 hover:bg-primary/10">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <User className="h-4 w-4 text-primary" />
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <div className="px-2 py-1.5">
+                  <p className="text-sm font-medium truncate">{user.email}</p>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/perfil" className="flex items-center gap-2 cursor-pointer">
+                    <User className="h-4 w-4" />
+                    Meu Perfil
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2 cursor-pointer text-destructive">
+                  <LogOut className="h-4 w-4" />
+                  Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link to="/entrar">
+              <Button variant="ghost" size="icon" className="min-h-10 min-w-10 hover:bg-primary/10">
+                <User className="h-5 w-5" />
+                <span className="sr-only">Entrar</span>
+              </Button>
+            </Link>
+          )}
 
           {/* Mobile Menu */}
           <Sheet open={open} onOpenChange={setOpen}>
@@ -120,6 +171,39 @@ export function Header() {
                       </span>
                     </div>
                   </Link>
+                </div>
+
+                {/* Mobile User Section */}
+                <div className="p-4 border-b border-border">
+                  {user ? (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <User className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm truncate max-w-[150px]">{user.email}</p>
+                          <Link 
+                            to="/perfil" 
+                            onClick={() => setOpen(false)}
+                            className="text-xs text-primary hover:underline"
+                          >
+                            Ver perfil
+                          </Link>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                        <LogOut className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Link to="/entrar" onClick={() => setOpen(false)}>
+                      <Button className="w-full">
+                        <User className="h-4 w-4 mr-2" />
+                        Entrar / Cadastrar
+                      </Button>
+                    </Link>
+                  )}
                 </div>
 
                 <nav className="flex flex-col p-4">

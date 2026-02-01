@@ -20,6 +20,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProblems from "./pages/admin/AdminProblems";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminProblemForm from "./pages/admin/AdminProblemForm";
+import AuthPage from "./pages/AuthPage";
+import ProfilePage from "./pages/ProfilePage";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +38,8 @@ const App = () => (
           <Route path="/contato" element={<ContactPage />} />
           <Route path="/termos" element={<TermsPage />} />
           <Route path="/privacidade" element={<PrivacyPage />} />
+          <Route path="/entrar" element={<AuthPage />} />
+          <Route path="/perfil" element={<ProfilePage />} />
           
           {/* Forum Routes */}
           <Route path="/forum" element={<ForumPage />} />
