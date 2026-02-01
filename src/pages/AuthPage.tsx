@@ -135,7 +135,12 @@ export default function AuthPage() {
           navigate('/');
         }
       } else {
-        const { error } = await signUp(email, password);
+        const { error } = await signUp(email, password, {
+          display_name: displayName,
+          phone: phone || undefined,
+          state: state || undefined,
+          city: city || undefined,
+        });
         if (error) {
           if (error.message.includes('User already registered')) {
             toast.error('Este email já está cadastrado. Tente fazer login.');
