@@ -32,7 +32,7 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 min-h-0 min-w-0">
-          <img alt="Fix-on" className="h-full w-32" src="/lovable-uploads/81ef09f8-7ff1-4caa-9855-b8433a225488.png" />
+          <img alt="Fix-on" className="h-full w-20" src="/lovable-uploads/81ef09f8-7ff1-4caa-9855-b8433a225488.png" />
           
         </Link>
 
