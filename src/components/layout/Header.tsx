@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Search, Home, Info, Mail, MessageCircle, Sparkles, User, LogOut } from 'lucide-react';
+import { Menu, X, Search, Home, Info, Mail, MessageCircle, Sparkles, User, LogOut, ThumbsUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -88,7 +88,7 @@ export function Header() {
         </Link>
 
         {/* Center: Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden lg:flex items-center gap-1">
           {menuItems.slice(1, 5).map((item) => (
             <Link
               key={item.href}
@@ -100,6 +100,24 @@ export function Header() {
             </Link>
           ))}
         </nav>
+
+        {/* Quick Links: Desktop */}
+        <div className="hidden md:flex items-center gap-1">
+          <Link
+            to="/contato"
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
+          >
+            <Mail className="h-4 w-4" />
+            <span className="hidden lg:inline">Contato</span>
+          </Link>
+          <Link
+            to="/contato?feedback=true"
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
+          >
+            <ThumbsUp className="h-4 w-4" />
+            <span className="hidden lg:inline">Sua Opinião</span>
+          </Link>
+        </div>
 
         {/* Right side: Search + Forum + User + Mobile Menu */}
         <div className="flex items-center gap-2">
@@ -263,6 +281,29 @@ export function Header() {
                     </motion.div>
                   ))}
                 </nav>
+
+                {/* Mobile Quick Actions */}
+                <div className="p-4 border-t border-border mt-auto">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">Fale Conosco</p>
+                  <div className="flex gap-2">
+                    <Link 
+                      to="/contato" 
+                      onClick={() => setOpen(false)}
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 bg-primary/10 text-primary text-sm font-medium rounded-lg hover:bg-primary/20 transition-all"
+                    >
+                      <Mail className="h-4 w-4" />
+                      Contato
+                    </Link>
+                    <Link 
+                      to="/contato?feedback=true" 
+                      onClick={() => setOpen(false)}
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 bg-green-500/10 text-green-600 text-sm font-medium rounded-lg hover:bg-green-500/20 transition-all"
+                    >
+                      <ThumbsUp className="h-4 w-4" />
+                      Opinião
+                    </Link>
+                  </div>
+                </div>
               </div>
             </SheetContent>
           </Sheet>
