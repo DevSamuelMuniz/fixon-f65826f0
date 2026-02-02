@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Search, Home, Info, Mail, MessageCircle, User, LogOut, ThumbsUp } from 'lucide-react';
+import { Menu, X, Search, Info, Mail, MessageCircle, User, LogOut, ThumbsUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -18,8 +18,7 @@ export function Header() {
 
   // Static menu items for navigation
   const menuItems = [
-    { label: 'Início', href: '/', icon: Home },
-    { label: 'Soluções', href: '/buscar', icon: Search },
+    { label: 'Soluções', href: '/', icon: Search },
     { label: 'Comunidade', href: '/comunidade', icon: MessageCircle },
     { label: 'Sobre', href: '/sobre', icon: Info },
     { label: 'Contato', href: '/contato', icon: Mail },
@@ -57,7 +56,7 @@ export function Header() {
         <nav className="hidden md:flex items-center gap-1">
           {/* Soluções Link */}
           <Link
-            to="/buscar"
+            to="/"
             className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
           >
             <Search className="h-4 w-4" />
