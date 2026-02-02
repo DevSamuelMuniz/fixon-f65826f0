@@ -54,7 +54,20 @@ export function Header() {
 
         {/* Center: Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-1">
-          {menuItems.slice(1).map((item) => (
+          {/* Highlighted Community Link */}
+          <Link to="/comunidade">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white text-sm font-medium rounded-full shadow-md hover:shadow-lg transition-all"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Comunidade
+            </motion.div>
+          </Link>
+          
+          {/* Other navigation items */}
+          {menuItems.slice(2).map((item) => (
             <Link
               key={item.href}
               to={item.href}
