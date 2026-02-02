@@ -61,6 +61,8 @@ export interface ForumQuestion {
   user_id: string | null;
   created_at: string;
   updated_at: string;
+  images?: string[];
+  mentions?: string[];
 }
 
 export interface ForumAnswer {
@@ -71,6 +73,9 @@ export interface ForumAnswer {
   is_solution: boolean;
   upvote_count: number;
   created_at: string;
+  user_id?: string | null;
+  images?: string[];
+  mentions?: string[];
 }
 
 export interface ForumUpvote {

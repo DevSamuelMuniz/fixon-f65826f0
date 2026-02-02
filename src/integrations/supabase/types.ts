@@ -59,7 +59,9 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          images: string[] | null
           is_solution: boolean
+          mentions: string[] | null
           question_id: string
           upvote_count: number
           user_id: string | null
@@ -69,7 +71,9 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          images?: string[] | null
           is_solution?: boolean
+          mentions?: string[] | null
           question_id: string
           upvote_count?: number
           user_id?: string | null
@@ -79,7 +83,9 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          images?: string[] | null
           is_solution?: boolean
+          mentions?: string[] | null
           question_id?: string
           upvote_count?: number
           user_id?: string | null
@@ -111,8 +117,10 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          images: string[] | null
           is_pinned: boolean
           last_activity_at: string | null
+          mentions: string[] | null
           niche: string | null
           resolved_at: string | null
           status: string
@@ -131,8 +139,10 @@ export type Database = {
           created_at?: string
           description: string
           id?: string
+          images?: string[] | null
           is_pinned?: boolean
           last_activity_at?: string | null
+          mentions?: string[] | null
           niche?: string | null
           resolved_at?: string | null
           status?: string
@@ -151,8 +161,10 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          images?: string[] | null
           is_pinned?: boolean
           last_activity_at?: string | null
+          mentions?: string[] | null
           niche?: string | null
           resolved_at?: string | null
           status?: string
@@ -308,6 +320,27 @@ export type Database = {
           phone?: string | null
           state?: string | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_badges: {
+        Row: {
+          badge_type: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_type: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_type?: string
+          earned_at?: string
+          id?: string
           user_id?: string
         }
         Relationships: []
