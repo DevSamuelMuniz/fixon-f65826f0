@@ -3,20 +3,21 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   ArrowLeft, MessageCircle, Clock, ThumbsUp, CheckCircle2, Send, 
-  Eye, Pin, LogIn, Sparkles, FolderOpen
+  Eye, Pin, LogIn, Sparkles, FolderOpen, Hash, AtSign, ImagePlus
 } from 'lucide-react';
 import { z } from 'zod';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/EmptyState';
 import { UserAvatar } from '@/components/UserAvatar';
 import { useToast } from '@/hooks/use-toast';
 import { useForumQuestion, useCreateAnswer, useToggleUpvote, useUserUpvotes, useMarkAsSolution, useIncrementViewCount } from '@/hooks/useForum';
+import { useMultipleUserBadges } from '@/hooks/useUserBadges';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
+import { RichTextInput, RichTextDisplay, ImageUpload, ImageGallery, UserBadges, type BadgeType } from '@/components/community';
 
 const commentSchema = z.object({
   content: z.string().min(5, 'Comentário muito curto (mínimo 5 caracteres)').max(5000, 'Comentário muito longo'),
@@ -55,11 +56,20 @@ export default function TopicDetailPage() {
   const { data: userUpvotes } = useUserUpvotes(answerIds);
   const incrementView = useIncrementViewCount();
   
+  // Get all user IDs from topic and answers for badge lookup
+  const allUserIds = [
+    topic?.user_id,
+    ...(topic?.answers?.map(a => a.user_id) || [])
+  ].filter((id): id is string => !!id);
+  const { data: userBadges } = useMultipleUserBadges(allUserIds);
+  
   const createAnswer = useCreateAnswer();
   const toggleUpvote = useToggleUpvote();
   const markAsSolution = useMarkAsSolution();
   
   const [commentContent, setCommentContent] = useState('');
+  const [commentImages, setCommentImages] = useState<string[]>([]);
+  const [commentMentions, setCommentMentions] = useState<string[]>([]);
   const [error, setError] = useState('');
 
   // Increment view count on first load
@@ -90,10 +100,14 @@ export default function TopicDetailPage() {
         content: commentContent,
         author_name: profile?.display_name || user.email?.split('@')[0] || undefined,
         user_id: user.id,
+        images: commentImages,
+        mentions: commentMentions,
       });
       
       toast({ title: 'Comentário enviado!' });
       setCommentContent('');
+      setCommentImages([]);
+      setCommentMentions([]);
     } catch (err) {
       toast({ title: 'Erro ao enviar', variant: 'destructive' });
     }
@@ -193,6 +207,10 @@ export default function TopicDetailPage() {
                 <span className="font-semibold text-foreground">
                   {topic.author_name || 'Anônimo'}
                 </span>
+                {/* User Badges */}
+                {topic.user_id && userBadges?.[topic.user_id] && (
+                  <UserBadges badges={userBadges[topic.user_id]} size="sm" maxDisplay={3} />
+                )}
                 {isResolved && (
                   <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/30">
                     <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -219,11 +237,31 @@ export default function TopicDetailPage() {
           </h1>
           
           {/* Description */}
-          <div className="prose prose-sm max-w-none">
-            <p className="text-foreground/90 whitespace-pre-wrap leading-relaxed">
-              {topic.description}
-            </p>
+          <div className="prose prose-sm max-w-none mb-4">
+            <RichTextDisplay 
+              content={topic.description}
+              className="text-foreground/90"
+            />
           </div>
+
+          {/* Images */}
+          {topic.images && topic.images.length > 0 && (
+            <div className="mb-4">
+              <ImageGallery images={topic.images} />
+            </div>
+          )}
+
+          {/* Tags */}
+          {topic.tags && topic.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {topic.tags.map((tag) => (
+                <Badge key={tag} variant="secondary" className="gap-1">
+                  <Hash className="h-3 w-3" />
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
 
           {/* Category */}
           {topic.category && (
@@ -283,10 +321,14 @@ export default function TopicDetailPage() {
                           className="flex-shrink-0"
                         />
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-medium text-foreground text-sm">
                               {comment.author_name || 'Anônimo'}
                             </span>
+                            {/* Comment Author Badges */}
+                            {comment.user_id && userBadges?.[comment.user_id] && (
+                              <UserBadges badges={userBadges[comment.user_id]} size="sm" maxDisplay={2} />
+                            )}
                             <span className="text-xs text-muted-foreground">
                               {formatTimeAgo(comment.created_at)}
                             </span>
@@ -295,10 +337,18 @@ export default function TopicDetailPage() {
                       </div>
                       
                       {/* Content */}
-                      <p className="text-foreground/90 whitespace-pre-wrap leading-relaxed mb-4 pl-11">
-                        {comment.content}
-                      </p>
-                      
+                      <div className="mb-4 pl-11">
+                        <RichTextDisplay 
+                          content={comment.content}
+                          className="text-foreground/90"
+                        />
+                        {/* Comment Images */}
+                        {comment.images && comment.images.length > 0 && (
+                          <div className="mt-3">
+                            <ImageGallery images={comment.images} />
+                          </div>
+                        )}
+                      </div>
                       {/* Actions */}
                       <div className="flex items-center justify-between pl-11">
                         <Button
@@ -362,19 +412,27 @@ export default function TopicDetailPage() {
                     size="sm"
                     className="flex-shrink-0 mt-2"
                   />
-                  <div className="flex-1 space-y-2">
-                    <Textarea
-                      placeholder="Compartilhe sua experiência ou ajude com uma resposta..."
+                  <div className="flex-1 space-y-3">
+                    <RichTextInput
                       value={commentContent}
-                      onChange={(e) => setCommentContent(e.target.value)}
-                      className={cn(
-                        'min-h-[100px] resize-none',
-                        error && 'border-destructive focus-visible:ring-destructive'
-                      )}
+                      onChange={(value, mentions) => {
+                        setCommentContent(value);
+                        setCommentMentions(mentions);
+                      }}
+                      placeholder="Compartilhe sua experiência ou ajude com uma resposta... Use @nome para mencionar e #tag para hashtags"
+                      minHeight="100px"
+                      error={!!error}
                     />
                     {error && (
                       <p className="text-sm text-destructive">{error}</p>
                     )}
+                    
+                    {/* Image upload for comment */}
+                    <ImageUpload
+                      images={commentImages}
+                      onChange={setCommentImages}
+                      maxImages={3}
+                    />
                   </div>
                 </div>
                 

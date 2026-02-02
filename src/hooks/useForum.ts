@@ -245,6 +245,8 @@ export function useCreateQuestion() {
       category_id?: string;
       tags?: string[];
       user_id?: string;
+      images?: string[];
+      mentions?: string[];
     }) => {
       const { data: question, error } = await supabase
         .from('forum_questions')
@@ -256,6 +258,8 @@ export function useCreateQuestion() {
           category_id: data.category_id || null,
           tags: data.tags || [],
           user_id: data.user_id || null,
+          images: data.images || [],
+          mentions: data.mentions || [],
         })
         .select()
         .single();
@@ -281,6 +285,8 @@ export function useCreateAnswer() {
       content: string; 
       author_name?: string;
       user_id?: string;
+      images?: string[];
+      mentions?: string[];
     }) => {
       const { data: answer, error } = await supabase
         .from('forum_answers')
@@ -289,6 +295,8 @@ export function useCreateAnswer() {
           content: data.content,
           author_name: data.author_name,
           user_id: data.user_id || null,
+          images: data.images || [],
+          mentions: data.mentions || [],
         })
         .select()
         .single();

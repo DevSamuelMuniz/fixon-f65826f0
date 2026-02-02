@@ -1,18 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { MessageCircle, ArrowLeft, Send, FolderOpen, LogIn } from 'lucide-react';
+import { MessageCircle, ArrowLeft, Send, FolderOpen, LogIn, Hash, AtSign, ImagePlus } from 'lucide-react';
 import { z } from 'zod';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useCreateQuestion } from '@/hooks/useForum';
 import { useCategories } from '@/hooks/useCategories';
 import { useAuth } from '@/hooks/useAuth';
+import { RichTextInput, ImageUpload } from '@/components/community';
 
 const topicSchema = z.object({
   title: z.string().min(10, 'O título deve ter pelo menos 10 caracteres').max(300, 'O título deve ter no máximo 300 caracteres'),
@@ -32,7 +33,11 @@ export default function NewTopicPage() {
     title: '',
     description: '',
     category_id: searchParams.get('categoria') || '',
+    images: [] as string[],
+    mentions: [] as string[],
+    tags: [] as string[],
   });
+  const [tagInput, setTagInput] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Redirect if not logged in
@@ -76,6 +81,9 @@ export default function NewTopicPage() {
         author_name: profile?.display_name || user.email?.split('@')[0] || undefined,
         category_id: formData.category_id,
         user_id: user.id,
+        images: formData.images,
+        mentions: formData.mentions,
+        tags: formData.tags,
       });
       
       toast({
@@ -197,22 +205,83 @@ export default function NewTopicPage() {
               )}
             </div>
 
-            {/* Description */}
+            {/* Description with Rich Text */}
             <div className="space-y-2">
-              <Label htmlFor="description">Descrição *</Label>
-              <Textarea
-                id="description"
-                placeholder="Explique em detalhes o problema ou assunto que você quer discutir..."
+              <Label htmlFor="description" className="flex items-center gap-2">
+                Descrição *
+                <span className="text-xs text-muted-foreground font-normal flex items-center gap-1">
+                  <AtSign className="h-3 w-3" /> mencionar
+                  <Hash className="h-3 w-3 ml-2" /> hashtag
+                </span>
+              </Label>
+              <RichTextInput
                 value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                className={`min-h-[180px] ${errors.description ? 'border-destructive' : ''}`}
+                onChange={(value, mentions) => setFormData(prev => ({ ...prev, description: value, mentions }))}
+                placeholder="Explique em detalhes o problema ou assunto que você quer discutir... Use @nome para mencionar usuários e #tag para hashtags"
+                minHeight="180px"
+                error={!!errors.description}
               />
               {errors.description && (
                 <p className="text-sm text-destructive">{errors.description}</p>
               )}
-              <p className="text-xs text-muted-foreground">
-                Quanto mais detalhes você fornecer, mais fácil será para a comunidade ajudar.
-              </p>
+            </div>
+
+            {/* Tags */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Hash className="h-4 w-4" />
+                Tags (opcional)
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Digite uma tag e pressione Enter"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && tagInput.trim()) {
+                      e.preventDefault();
+                      const tag = tagInput.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+                      if (tag && !formData.tags.includes(tag) && formData.tags.length < 5) {
+                        setFormData(prev => ({ ...prev, tags: [...prev.tags, tag] }));
+                      }
+                      setTagInput('');
+                    }
+                  }}
+                />
+              </div>
+              {formData.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {formData.tags.map((tag) => (
+                    <Badge key={tag} variant="secondary" className="gap-1">
+                      #{tag}
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ 
+                          ...prev, 
+                          tags: prev.tags.filter(t => t !== tag) 
+                        }))}
+                        className="ml-1 hover:text-destructive"
+                      >
+                        ×
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">Máximo 5 tags</p>
+            </div>
+
+            {/* Image Upload */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <ImagePlus className="h-4 w-4" />
+                Imagens (opcional)
+              </Label>
+              <ImageUpload
+                images={formData.images}
+                onChange={(images) => setFormData(prev => ({ ...prev, images }))}
+                maxImages={4}
+              />
             </div>
 
             {/* Author info */}
