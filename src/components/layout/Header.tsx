@@ -19,6 +19,7 @@ export function Header() {
   // Static menu items for navigation
   const menuItems = [
     { label: 'Início', href: '/', icon: Home },
+    { label: 'Soluções', href: '/buscar', icon: Search },
     { label: 'Comunidade', href: '/comunidade', icon: MessageCircle },
     { label: 'Sobre', href: '/sobre', icon: Info },
     { label: 'Contato', href: '/contato', icon: Mail },
@@ -54,6 +55,15 @@ export function Header() {
 
         {/* Center: Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-1">
+          {/* Soluções Link */}
+          <Link
+            to="/buscar"
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
+          >
+            <Search className="h-4 w-4" />
+            Soluções
+          </Link>
+          
           {/* Highlighted Community Link */}
           <Link to="/comunidade">
             <motion.div
@@ -66,8 +76,8 @@ export function Header() {
             </motion.div>
           </Link>
           
-          {/* Other navigation items */}
-          {menuItems.slice(2).map((item) => (
+          {/* Other navigation items (Sobre, Contato) */}
+          {menuItems.slice(3).map((item) => (
             <Link
               key={item.href}
               to={item.href}
