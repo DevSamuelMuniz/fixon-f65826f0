@@ -31,6 +31,122 @@ export interface ForumQuestionWithCategory extends ForumQuestion {
   category?: Category | null;
 }
 
+export interface ForumStats {
+  totalTopics: number;
+  totalComments: number;
+  resolvedTopics: number;
+  activeToday: number;
+  byCategory: Record<string, { topics: number; comments: number }>;
+  recentTopics: Array<{
+    id: string;
+    title: string;
+    author_name: string | null;
+    status: string;
+    answer_count: number;
+    view_count: number;
+    is_pinned: boolean;
+    category_name: string;
+  }>;
+}
+
+// Fetch forum stats
+export function useForumStats() {
+  return useQuery({
+    queryKey: ['forum-stats'],
+    queryFn: async (): Promise<ForumStats> => {
+      // Get total topics
+      const { count: totalTopics } = await supabase
+        .from('forum_questions')
+        .select('*', { count: 'exact', head: true });
+      
+      // Get total comments
+      const { count: totalComments } = await supabase
+        .from('forum_answers')
+        .select('*', { count: 'exact', head: true });
+      
+      // Get resolved topics
+      const { count: resolvedTopics } = await supabase
+        .from('forum_questions')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'resolved');
+      
+      // Get active today
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const { count: activeToday } = await supabase
+        .from('forum_questions')
+        .select('*', { count: 'exact', head: true })
+        .gte('last_activity_at', today.toISOString());
+      
+      // Get recent topics with category
+      const { data: recentTopics } = await supabase
+        .from('forum_questions')
+        .select('id, title, author_name, status, answer_count, view_count, is_pinned, category:categories(name)')
+        .order('is_pinned', { ascending: false })
+        .order('last_activity_at', { ascending: false })
+        .limit(10);
+      
+      // Get stats by category
+      const { data: categoryStats } = await supabase
+        .from('forum_questions')
+        .select('category_id');
+      
+      const byCategory: Record<string, { topics: number; comments: number }> = {};
+      categoryStats?.forEach((item) => {
+        if (item.category_id) {
+          if (!byCategory[item.category_id]) {
+            byCategory[item.category_id] = { topics: 0, comments: 0 };
+          }
+          byCategory[item.category_id].topics++;
+        }
+      });
+      
+      return {
+        totalTopics: totalTopics || 0,
+        totalComments: totalComments || 0,
+        resolvedTopics: resolvedTopics || 0,
+        activeToday: activeToday || 0,
+        byCategory,
+        recentTopics: (recentTopics || []).map((t: any) => ({
+          ...t,
+          category_name: t.category?.name || 'Sem categoria',
+        })),
+      };
+    },
+    staleTime: 30000, // 30 seconds
+  });
+}
+
+// Fetch topics by category
+export function useTopicsByCategory(categoryId: string, sortBy: string = 'recent') {
+  return useQuery({
+    queryKey: ['forum-topics', categoryId, sortBy],
+    queryFn: async () => {
+      let query = supabase
+        .from('forum_questions')
+        .select('*')
+        .eq('category_id', categoryId);
+      
+      if (sortBy === 'resolved') {
+        query = query.eq('status', 'resolved');
+      }
+      
+      if (sortBy === 'popular') {
+        query = query.order('answer_count', { ascending: false });
+      } else {
+        query = query
+          .order('is_pinned', { ascending: false })
+          .order('last_activity_at', { ascending: false });
+      }
+      
+      const { data, error } = await query.limit(50);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!categoryId,
+  });
+}
+
 // Fetch all forum questions with optional filters
 export function useForumQuestions(filters?: ForumFilters) {
   return useQuery({
@@ -90,6 +206,32 @@ export function useForumQuestion(questionId: string) {
   });
 }
 
+// Increment view count (uses raw SQL via supabase)
+export function useIncrementViewCount() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (topicId: string) => {
+      // Get current view count and increment
+      const { data: current } = await supabase
+        .from('forum_questions')
+        .select('view_count')
+        .eq('id', topicId)
+        .single();
+      
+      if (current) {
+        await supabase
+          .from('forum_questions')
+          .update({ view_count: (current.view_count || 0) + 1 })
+          .eq('id', topicId);
+      }
+    },
+    onSuccess: (_, topicId) => {
+      queryClient.invalidateQueries({ queryKey: ['forum-question', topicId] });
+    },
+  });
+}
+
 // Create question
 export function useCreateQuestion() {
   const queryClient = useQueryClient();
@@ -102,6 +244,7 @@ export function useCreateQuestion() {
       author_email?: string;
       category_id?: string;
       tags?: string[];
+      user_id?: string;
     }) => {
       const { data: question, error } = await supabase
         .from('forum_questions')
@@ -112,6 +255,7 @@ export function useCreateQuestion() {
           author_email: data.author_email,
           category_id: data.category_id || null,
           tags: data.tags || [],
+          user_id: data.user_id || null,
         })
         .select()
         .single();
@@ -121,6 +265,8 @@ export function useCreateQuestion() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['forum-questions'] });
+      queryClient.invalidateQueries({ queryKey: ['forum-topics'] });
+      queryClient.invalidateQueries({ queryKey: ['forum-stats'] });
     },
   });
 }
@@ -130,10 +276,20 @@ export function useCreateAnswer() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (data: { question_id: string; content: string; author_name?: string }) => {
+    mutationFn: async (data: { 
+      question_id: string; 
+      content: string; 
+      author_name?: string;
+      user_id?: string;
+    }) => {
       const { data: answer, error } = await supabase
         .from('forum_answers')
-        .insert(data)
+        .insert({
+          question_id: data.question_id,
+          content: data.content,
+          author_name: data.author_name,
+          user_id: data.user_id || null,
+        })
         .select()
         .single();
       
@@ -143,6 +299,7 @@ export function useCreateAnswer() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['forum-question', variables.question_id] });
       queryClient.invalidateQueries({ queryKey: ['forum-questions'] });
+      queryClient.invalidateQueries({ queryKey: ['forum-stats'] });
     },
   });
 }
@@ -220,6 +377,7 @@ export function useMarkAsSolution() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['forum-question', variables.questionId] });
       queryClient.invalidateQueries({ queryKey: ['forum-questions'] });
+      queryClient.invalidateQueries({ queryKey: ['forum-stats'] });
     },
   });
 }

@@ -12,8 +12,8 @@ const categories = [
 ];
 
 const community = [
-  { label: 'Fórum de Dúvidas', href: '/forum', icon: MessageCircle },
-  { label: 'Nova Pergunta', href: '/forum/nova-pergunta', icon: Users },
+  { label: 'Comunidade', href: '/comunidade', icon: MessageCircle },
+  { label: 'Novo Tópico', href: '/comunidade/novo-topico', icon: Users },
 ];
 
 const institutional = [

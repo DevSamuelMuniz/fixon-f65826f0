@@ -17,6 +17,10 @@ import PrivacyPage from "./pages/PrivacyPage";
 import ForumPage from "./pages/ForumPage";
 import NewQuestionPage from "./pages/NewQuestionPage";
 import QuestionDetailPage from "./pages/QuestionDetailPage";
+import CommunityPage from "./pages/CommunityPage";
+import CategoryTopicsPage from "./pages/CategoryTopicsPage";
+import TopicDetailPage from "./pages/TopicDetailPage";
+import NewTopicPage from "./pages/NewTopicPage";
 import AdminAuth from "./pages/admin/AdminAuth";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProblems from "./pages/admin/AdminProblems";
@@ -44,13 +48,21 @@ const App = () => (
             <Route path="/termos" element={<TermsPage />} />
             <Route path="/privacidade" element={<PrivacyPage />} />
             <Route path="/entrar" element={<AuthPage />} />
+            <Route path="/auth" element={<AuthPage />} />
             <Route path="/perfil" element={<ProfilePage />} />
             <Route path="/instalar" element={<InstallPage />} />
             
-            {/* Forum Routes */}
-            <Route path="/forum" element={<ForumPage />} />
-            <Route path="/forum/nova-pergunta" element={<NewQuestionPage />} />
-            <Route path="/forum/:questionId" element={<QuestionDetailPage />} />
+            {/* Community Routes (new) */}
+            <Route path="/comunidade" element={<CommunityPage />} />
+            <Route path="/comunidade/todos" element={<ForumPage />} />
+            <Route path="/comunidade/novo-topico" element={<NewTopicPage />} />
+            <Route path="/comunidade/topico/:topicId" element={<TopicDetailPage />} />
+            <Route path="/comunidade/:categorySlug" element={<CategoryTopicsPage />} />
+            
+            {/* Legacy Forum Routes (redirect to community) */}
+            <Route path="/forum" element={<CommunityPage />} />
+            <Route path="/forum/nova-pergunta" element={<NewTopicPage />} />
+            <Route path="/forum/:questionId" element={<TopicDetailPage />} />
             
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminAuth />} />

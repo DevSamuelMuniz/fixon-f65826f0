@@ -55,6 +55,10 @@ export interface ForumQuestion {
   answer_count: number;
   category_id: string | null;
   tags: string[];
+  view_count: number;
+  is_pinned: boolean;
+  last_activity_at: string | null;
+  user_id: string | null;
   created_at: string;
   updated_at: string;
 }

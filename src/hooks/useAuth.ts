@@ -2,9 +2,21 @@ import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
+interface Profile {
+  id: string;
+  user_id: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  phone: string | null;
+  state: string | null;
+  city: string | null;
+}
+
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -16,13 +28,15 @@ export function useAuth() {
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Check admin role after auth state change
+        // Check admin role and fetch profile after auth state change
         if (session?.user) {
           setTimeout(() => {
             checkAdminRole(session.user.id);
+            fetchProfile(session.user.id);
           }, 0);
         } else {
           setIsAdmin(false);
+          setProfile(null);
         }
       }
     );
@@ -35,6 +49,7 @@ export function useAuth() {
 
       if (session?.user) {
         checkAdminRole(session.user.id);
+        fetchProfile(session.user.id);
       }
     });
 
@@ -50,6 +65,16 @@ export function useAuth() {
       .maybeSingle();
 
     setIsAdmin(!!data);
+  };
+
+  const fetchProfile = async (userId: string) => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    setProfile(data as Profile | null);
   };
 
   const signIn = async (email: string, password: string) => {
@@ -91,6 +116,7 @@ export function useAuth() {
   return {
     user,
     session,
+    profile,
     loading,
     isAdmin,
     signIn,
