@@ -246,15 +246,23 @@ export function RichTextDisplay({ content, className }: RichTextDisplayProps) {
     return parts.map((part, index) => {
       if (part.startsWith('@')) {
         return (
-          <span key={index} className="text-primary font-medium hover:underline cursor-pointer">
-            {part}
+          <span 
+            key={index} 
+            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 mx-0.5 bg-primary/15 text-primary font-medium text-[0.9em] rounded-md hover:bg-primary/25 cursor-pointer transition-colors"
+          >
+            <AtSign className="h-3 w-3" />
+            {part.slice(1)}
           </span>
         );
       }
       if (part.startsWith('#')) {
         return (
-          <span key={index} className="text-purple-500 font-medium hover:underline cursor-pointer">
-            {part}
+          <span 
+            key={index} 
+            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 mx-0.5 bg-purple-500/15 text-purple-500 font-medium text-[0.9em] rounded-md hover:bg-purple-500/25 cursor-pointer transition-colors"
+          >
+            <Hash className="h-3 w-3" />
+            {part.slice(1)}
           </span>
         );
       }
