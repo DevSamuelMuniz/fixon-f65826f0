@@ -482,10 +482,12 @@ export default function TopicDetailPage() {
                 <div>
                   <RichTextInput
                     value={commentContent}
-                    onChange={setCommentContent}
-                    onMentionsChange={setCommentMentions}
+                    onChange={(val, mentions) => {
+                      setCommentContent(val);
+                      setCommentMentions(mentions || []);
+                    }}
                     placeholder="Escreva seu comentário... Use @nome para mencionar alguém"
-                    maxLength={MAX_CHARS}
+                    maxChars={MAX_CHARS}
                   />
                   {error && <p className="text-destructive text-sm mt-1">{error}</p>}
                   <div className="text-xs text-muted-foreground text-right mt-1">
@@ -495,7 +497,7 @@ export default function TopicDetailPage() {
 
                 <ImageUpload
                   images={commentImages}
-                  onImagesChange={setCommentImages}
+                  onChange={setCommentImages}
                   maxImages={3}
                 />
 
