@@ -2,6 +2,7 @@ import { ReactNode, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, FileText, FolderOpen, LogOut, Home, Mail } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { Button } from '@/components/ui/button';
 import logo from '@/assets/logo.png';
 import { cn } from '@/lib/utils';
@@ -22,6 +23,7 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
   const { user, isAdmin, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const unreadCount = useUnreadMessages();
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -76,42 +78,65 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
         {/* Sidebar */}
         <aside className="w-64 min-h-[calc(100vh-64px)] bg-card border-r border-border hidden md:block">
           <nav className="p-4 space-y-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                to={item.href}
-                className={cn(
-                  'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                  location.pathname === item.href
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                )}
-              >
-                <item.icon className="h-4 w-4" />
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const isMensagens = item.href === '/admin/mensagens';
+              return (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className={cn(
+                    'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                    location.pathname === item.href
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  )}
+                >
+                  <item.icon className="h-4 w-4 shrink-0" />
+                  <span className="flex-1">{item.label}</span>
+                  {isMensagens && unreadCount > 0 && (
+                    <span className={cn(
+                      'inline-flex items-center justify-center rounded-full text-[10px] font-bold min-w-[18px] h-[18px] px-1',
+                      location.pathname === item.href
+                        ? 'bg-primary-foreground text-primary'
+                        : 'bg-primary text-primary-foreground'
+                    )}>
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
           </nav>
         </aside>
 
         {/* Mobile Nav */}
         <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
           <nav className="flex justify-around p-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                to={item.href}
-                className={cn(
-                  'flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium',
-                  location.pathname === item.href
-                    ? 'text-primary'
-                    : 'text-muted-foreground'
-                )}
-              >
-                <item.icon className="h-5 w-5" />
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const isMensagens = item.href === '/admin/mensagens';
+              return (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className={cn(
+                    'relative flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium',
+                    location.pathname === item.href
+                      ? 'text-primary'
+                      : 'text-muted-foreground'
+                  )}
+                >
+                  <div className="relative">
+                    <item.icon className="h-5 w-5" />
+                    {isMensagens && unreadCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[9px] font-bold min-w-[14px] h-[14px] px-0.5">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </span>
+                    )}
+                  </div>
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
         </div>
 
