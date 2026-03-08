@@ -13,7 +13,7 @@ import { useCategories } from '@/hooks/useCategories';
 import { useFeaturedProblems, useProblems } from '@/hooks/useProblems';
 import { useNiche } from '@/contexts/NicheContext';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AdBanner, AdInArticle } from '@/components/ads';
+import { AdBanner, AdInArticle } from '@/components/promo';
 const Index = () => {
   const { niche, nicheSlug } = useNiche();
   const { data: categories, isLoading: categoriesLoading } = useCategories();

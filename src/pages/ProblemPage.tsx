@@ -12,7 +12,7 @@ import { useProblemBySlug, useProblems, useIncrementViewCount } from '@/hooks/us
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { AdInArticle, AdSidebar } from '@/components/ads';
+import { AdInArticle, AdSidebar } from '@/components/promo';
 import { HowToJsonLd } from '@/components/HowToJsonLd';
 import { SocialMetaTags } from '@/components/SocialMetaTags';
 

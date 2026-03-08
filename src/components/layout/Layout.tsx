@@ -3,7 +3,7 @@ import { Header } from './Header';
 import { Footer } from './Footer';
 import { DynamicSEO } from '@/components/DynamicSEO';
 import { NicheSwitcher } from '@/components/NicheSwitcher';
-import { AdSenseScript } from '@/components/ads';
+import { AdSenseScript } from '@/components/promo';
 import { PWAInstallModal } from '@/components/PWAInstallModal';
 
 interface LayoutProps {
