@@ -465,6 +465,7 @@ export default function TopicDetailPage() {
                       placeholder="Compartilhe sua experiência ou ajude com uma resposta... Use @nome para mencionar e #tag para hashtags"
                       minHeight="100px"
                       error={!!error}
+                      maxChars={MAX_CHARS}
                     />
                     {error && (
                       <p className="text-sm text-destructive">{error}</p>
