@@ -7,10 +7,15 @@ export function StatsBadge() {
   const { data: stats, isLoading } = useHomeStats();
 
   const items = [
-    { icon: CheckCircle2, value: stats ? formatCount(stats.solutionsCount) : '0+', label: 'Soluções' },
-    { icon: Users, value: stats ? formatCount(stats.usersCount) : '0+', label: 'Usuários' },
-    { icon: Zap, value: stats?.avgResponseTime || '< 5min', label: 'Tempo médio' },
+    { icon: CheckCircle2, value: stats ? formatCount(stats.solutionsCount) : null, label: 'Soluções' },
+    { icon: Users, value: stats ? formatCount(stats.usersCount) : null, label: 'Usuários' },
+    { icon: Zap, value: stats?.avgResponseTime || null, label: 'Tempo médio' },
   ];
+
+  // Hide entirely while loading or if all values are zero/empty
+  const hasData = stats && (stats.solutionsCount > 0 || stats.usersCount > 0);
+
+  if (!isLoading && !hasData) return null;
 
   return (
     <motion.div
