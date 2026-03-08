@@ -1,34 +1,55 @@
 import { useState } from 'react';
-import { Mail, MessageSquare, Send } from 'lucide-react';
+import { Mail, MessageSquare, Send, Loader2 } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { z } from 'zod';
+
+const contactSchema = z.object({
+  name: z.string().trim().min(1, 'Nome é obrigatório').max(100, 'Nome muito longo'),
+  email: z.string().trim().email('Email inválido').max(255, 'Email muito longo'),
+  message: z.string().trim().min(10, 'Mensagem muito curta (mínimo 10 caracteres)').max(2000, 'Mensagem muito longa'),
+});
 
 export default function ContactPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const validation = contactSchema.safeParse({ name, email, message });
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
+      return;
+    }
+
     setLoading(true);
 
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const { error } = await supabase
+      .from('contact_messages')
+      .insert({
+        name: validation.data.name,
+        email: validation.data.email,
+        message: validation.data.message,
+      });
 
-    toast({
-      title: 'Mensagem enviada!',
-      description: 'Obrigado pelo contato. Responderemos em breve.',
-    });
+    setLoading(false);
 
+    if (error) {
+      toast.error('Erro ao enviar mensagem. Tente novamente.');
+      return;
+    }
+
+    toast.success('Mensagem enviada! Obrigado pelo contato. Responderemos em breve.');
     setName('');
     setEmail('');
     setMessage('');
-    setLoading(false);
   };
 
   return (
@@ -56,6 +77,7 @@ export default function ContactPage() {
               onChange={(e) => setName(e.target.value)}
               placeholder="Seu nome"
               required
+              maxLength={100}
             />
           </div>
 
@@ -70,6 +92,7 @@ export default function ContactPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="seu@email.com"
               required
+              maxLength={255}
             />
           </div>
 
@@ -84,12 +107,17 @@ export default function ContactPage() {
               placeholder="Digite sua mensagem..."
               rows={5}
               required
+              maxLength={2000}
             />
+            <p className="text-xs text-muted-foreground mt-1 text-right">{message.length}/2000</p>
           </div>
 
           <Button type="submit" className="w-full" size="lg" disabled={loading}>
             {loading ? (
-              'Enviando...'
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Enviando...
+              </>
             ) : (
               <>
                 <Send className="h-4 w-4 mr-2" />

@@ -30,6 +30,8 @@ import AdminProblemForm from "./pages/admin/AdminProblemForm";
 import AuthPage from "./pages/AuthPage";
 import ProfilePage from "./pages/ProfilePage";
 import InstallPage from "./pages/InstallPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+import NewPasswordPage from "./pages/NewPasswordPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -68,6 +70,8 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/perfil" element={<ProfilePage />} />
             <Route path="/instalar" element={<InstallPage />} />
+            <Route path="/recuperar-senha" element={<ResetPasswordPage />} />
+            <Route path="/nova-senha" element={<NewPasswordPage />} />
             
             {/* Community Routes (new) */}
             <Route path="/comunidade" element={<CommunityPage />} />

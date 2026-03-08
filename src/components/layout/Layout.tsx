@@ -5,6 +5,7 @@ import { DynamicSEO } from '@/components/DynamicSEO';
 import { NicheSwitcher } from '@/components/NicheSwitcher';
 import { AdSenseScript } from '@/components/promo';
 import { PWAInstallModal } from '@/components/PWAInstallModal';
+import { CookieBanner } from '@/components/CookieBanner';
 
 interface LayoutProps {
   children: ReactNode;
@@ -24,6 +25,7 @@ export function Layout({ children, title, description }: LayoutProps) {
       <Footer />
       <NicheSwitcher />
       <PWAInstallModal />
+      <CookieBanner />
     </div>
   );
 }

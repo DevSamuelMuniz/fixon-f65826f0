@@ -450,6 +450,17 @@ export default function AuthPage() {
                 )}
               </Button>
 
+              {isLogin && (
+                <div className="text-center">
+                  <Link
+                    to="/recuperar-senha"
+                    className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    Esqueceu sua senha?
+                  </Link>
+                </div>
+              )}
+
               {/* Features list on mobile */}
               {!isLogin && (
                 <div className="lg:hidden pt-4 border-t border-border mt-6">
