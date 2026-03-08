@@ -15,7 +15,8 @@ export type BadgeType =
   | 'early_adopter' // First 100 users
   | 'trusted'       // Verified user
   | 'moderator'     // Mod role
-  | 'admin';        // Admin role
+  | 'admin'         // Admin role
+  | 'premium';      // Premium subscriber
 
 interface BadgeConfig {
   icon: LucideIcon;
