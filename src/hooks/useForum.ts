@@ -41,6 +41,7 @@ export interface ForumStats {
     id: string;
     title: string;
     author_name: string | null;
+    user_id: string | null;
     status: string;
     answer_count: number;
     view_count: number;

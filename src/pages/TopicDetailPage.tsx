@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   ArrowLeft, MessageCircle, Clock, ThumbsUp, CheckCircle2, Send, 
-  Eye, Pin, LogIn, Sparkles, FolderOpen, Hash, Share2, SortAsc
+  Eye, Pin, LogIn, Sparkles, FolderOpen, Hash, Share2, SortAsc, Crown
 } from 'lucide-react';
 import { z } from 'zod';
 import { Layout } from '@/components/layout/Layout';
@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useForumQuestion, useCreateAnswer, useToggleUpvote, useUserUpvotes, useMarkAsSolution, useIncrementViewCount } from '@/hooks/useForum';
 import { useMultipleUserBadges } from '@/hooks/useUserBadges';
 import { useAuth } from '@/hooks/useAuth';
+import { usePremiumUsers } from '@/hooks/usePremiumUsers';
 import { cn } from '@/lib/utils';
 import { RichTextInput, RichTextDisplay, ImageUpload, ImageGallery, UserBadges } from '@/components/community';
 
@@ -66,6 +67,7 @@ export default function TopicDetailPage() {
     ...(topic?.answers?.map(a => a.user_id) || [])
   ].filter((id): id is string => !!id);
   const { data: userBadges } = useMultipleUserBadges(allUserIds);
+  const { data: premiumUsers } = usePremiumUsers(allUserIds);
   
   const createAnswer = useCreateAnswer();
   const toggleUpvote = useToggleUpvote();
@@ -153,11 +155,9 @@ export default function TopicDetailPage() {
     if (sortMode === 'newest') {
       return answers.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
-    // oldest
     return answers.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
   };
 
-  // Can the current user mark a solution? Admin OR topic author
   const canMarkSolution = isAdmin || (user && topic?.user_id === user.id);
 
   if (isLoading) {
@@ -193,6 +193,7 @@ export default function TopicDetailPage() {
   }
 
   const isResolved = topic.status === 'resolved';
+  const isTopicAuthorPremium = topic.user_id ? premiumUsers?.has(topic.user_id) : false;
 
   return (
     <Layout>
@@ -218,16 +219,34 @@ export default function TopicDetailPage() {
           animate={{ opacity: 1, y: 0 }}
           className={cn(
             "mb-8 p-6 bg-card border rounded-2xl",
-            topic.is_pinned ? "border-amber-500/30" : "border-border"
+            isTopicAuthorPremium
+              ? "border-amber-400/60 shadow-[0_0_20px_hsl(var(--premium-glow,45_100%_50%)/0.15)] ring-1 ring-amber-400/30"
+              : topic.is_pinned
+              ? "border-amber-500/30"
+              : "border-border"
           )}
         >
-          {topic.is_pinned && (
+          {isTopicAuthorPremium && (
+            <div className="flex items-center gap-2 mb-3">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-400/10 text-amber-500 border border-amber-400/30 rounded-full text-xs font-semibold">
+                <Crown className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                Premium
+              </span>
+            </div>
+          )}
+          {topic.is_pinned && !isTopicAuthorPremium && (
             <div className="flex items-center gap-2 mb-4">
               <Badge className="bg-amber-500 text-white">
                 <Pin className="h-3 w-3 mr-1" />
                 Fixado
               </Badge>
             </div>
+          )}
+          {topic.is_pinned && isTopicAuthorPremium && (
+            <Badge className="bg-amber-500 text-white mb-3 mr-2">
+              <Pin className="h-3 w-3 mr-1" />
+              Fixado
+            </Badge>
           )}
           
           <div className="flex items-start gap-4 mb-4">
@@ -241,6 +260,9 @@ export default function TopicDetailPage() {
                 <span className="font-semibold text-foreground">
                   {topic.author_name || 'Anônimo'}
                 </span>
+                {isTopicAuthorPremium && (
+                  <Crown className="h-4 w-4 fill-amber-400 text-amber-400 flex-shrink-0" />
+                )}
                 {topic.user_id && userBadges?.[topic.user_id] && (
                   <UserBadges badges={userBadges[topic.user_id]} size="sm" maxDisplay={3} />
                 )}
@@ -315,7 +337,6 @@ export default function TopicDetailPage() {
               {topic.answer_count} {topic.answer_count === 1 ? 'Comentário' : 'Comentários'}
             </h2>
 
-            {/* Sort select */}
             {topic.answers && topic.answers.length > 1 && (
               <div className="flex items-center gap-1 border border-border rounded-lg overflow-hidden text-xs">
                 {(['best', 'newest', 'oldest'] as SortMode[]).map(mode => (
@@ -340,6 +361,7 @@ export default function TopicDetailPage() {
             <div className="space-y-4">
               {sortedAnswers().map((comment, index) => {
                 const isUpvoted = userUpvotes?.includes(comment.id);
+                const isCommentAuthorPremium = comment.user_id ? premiumUsers?.has(comment.user_id) : false;
                 return (
                   <motion.div
                     key={comment.id}
@@ -350,6 +372,8 @@ export default function TopicDetailPage() {
                       'relative p-5 rounded-xl border transition-all',
                       comment.is_solution 
                         ? 'bg-green-500/5 border-green-500/30 ring-1 ring-green-500/20' 
+                        : isCommentAuthorPremium
+                        ? 'bg-amber-400/5 border-amber-400/40 ring-1 ring-amber-400/20'
                         : 'bg-card border-border'
                     )}
                   >
@@ -371,6 +395,12 @@ export default function TopicDetailPage() {
                           <span className="font-medium text-foreground text-sm">
                             {comment.author_name || 'Anônimo'}
                           </span>
+                          {isCommentAuthorPremium && (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-amber-400/15 text-amber-500 border border-amber-400/30 rounded-full text-xs font-semibold">
+                              <Crown className="h-3 w-3 fill-amber-400 text-amber-400" />
+                              Premium
+                            </span>
+                          )}
                           {comment.user_id && userBadges?.[comment.user_id] && (
                             <UserBadges badges={userBadges[comment.user_id]} size="sm" maxDisplay={2} />
                           )}
@@ -449,40 +479,30 @@ export default function TopicDetailPage() {
               </h3>
               
               <form onSubmit={handleSubmitComment} className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <UserAvatar 
-                    name={profile?.display_name || user.email?.split('@')[0]} 
-                    size="sm"
-                    className="flex-shrink-0 mt-2"
+                <div>
+                  <RichTextInput
+                    value={commentContent}
+                    onChange={setCommentContent}
+                    onMentionsChange={setCommentMentions}
+                    placeholder="Escreva seu comentário... Use @nome para mencionar alguém"
+                    maxLength={MAX_CHARS}
                   />
-                  <div className="flex-1 space-y-3">
-                    <RichTextInput
-                      value={commentContent}
-                      onChange={(value, mentions) => {
-                        setCommentContent(value);
-                        setCommentMentions(mentions);
-                      }}
-                      placeholder="Compartilhe sua experiência ou ajude com uma resposta... Use @nome para mencionar e #tag para hashtags"
-                      minHeight="100px"
-                      error={!!error}
-                      maxChars={MAX_CHARS}
-                    />
-                    {error && (
-                      <p className="text-sm text-destructive">{error}</p>
-                    )}
-                    
-                    <ImageUpload
-                      images={commentImages}
-                      onChange={setCommentImages}
-                      maxImages={3}
-                    />
+                  {error && <p className="text-destructive text-sm mt-1">{error}</p>}
+                  <div className="text-xs text-muted-foreground text-right mt-1">
+                    {commentContent.length}/{MAX_CHARS}
                   </div>
                 </div>
-                
+
+                <ImageUpload
+                  images={commentImages}
+                  onImagesChange={setCommentImages}
+                  maxImages={3}
+                />
+
                 <div className="flex justify-end">
                   <Button
                     type="submit"
-                    disabled={createAnswer.isPending}
+                    disabled={createAnswer.isPending || !commentContent.trim()}
                     className="gap-2"
                   >
                     <Send className="h-4 w-4" />
@@ -492,21 +512,33 @@ export default function TopicDetailPage() {
               </form>
             </>
           ) : (
-            <div className="text-center py-8">
+            <div className="text-center py-6">
               <LogIn className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-              <h3 className="font-semibold text-foreground mb-2">Faça login para comentar</h3>
+              <p className="text-foreground font-medium mb-2">Entre para comentar</p>
               <p className="text-sm text-muted-foreground mb-4">
-                Entre na sua conta para participar da discussão
+                Faça login para participar da discussão
               </p>
               <Link to="/auth">
                 <Button className="gap-2">
                   <LogIn className="h-4 w-4" />
-                  Entrar
+                  Fazer login
                 </Button>
               </Link>
             </div>
           )}
         </motion.div>
+
+        {/* Back button */}
+        <div className="mt-6">
+          <Button
+            variant="ghost"
+            onClick={() => navigate(-1)}
+            className="gap-2 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar
+          </Button>
+        </div>
       </div>
     </Layout>
   );
