@@ -22,6 +22,7 @@ const formatStyles: Record<AdFormat, { width: string; height: string }> = {
 
 export function AdUnit({ format, slot, className, responsive = true }: AdUnitProps) {
   const { niche } = useNiche();
+  const { isPremium } = useSubscription();
   const adRef = useRef<HTMLDivElement>(null);
   const isLoaded = useRef(false);
 
