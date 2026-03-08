@@ -247,6 +247,73 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          actor_avatar_url: string | null
+          actor_name: string | null
+          answer_id: string | null
+          created_at: string
+          id: string
+          link: string | null
+          message: string
+          question_id: string | null
+          read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          actor_avatar_url?: string | null
+          actor_name?: string | null
+          answer_id?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          message: string
+          question_id?: string | null
+          read?: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          actor_avatar_url?: string | null
+          actor_name?: string | null
+          answer_id?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          message?: string
+          question_id?: string | null
+          read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_answer_id_fkey"
+            columns: ["answer_id"]
+            isOneToOne: false
+            referencedRelation: "forum_answers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "forum_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "forum_questions_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       problems: {
         Row: {
           category_id: string

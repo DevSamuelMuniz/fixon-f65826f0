@@ -88,19 +88,23 @@ export function TopContributors() {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: idx * 0.06 }}
-          className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
         >
-          <span className="text-sm w-6 text-center">{medals[idx]}</span>
-          <UserAvatar name={c.display_name} avatarUrl={c.avatar_url || undefined} size="sm" />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-foreground truncate">
-              {c.display_name || 'Anônimo'}
-            </p>
-            <p className="text-xs text-muted-foreground flex items-center gap-1">
-              <MessageCircle className="h-3 w-3" />
-              {c.answer_count} {c.answer_count === 1 ? 'resposta' : 'respostas'}
-            </p>
-          </div>
+          <Link
+            to={`/perfil/${c.user_id}`}
+            className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors group"
+          >
+            <span className="text-sm w-6 text-center">{medals[idx]}</span>
+            <UserAvatar name={c.display_name} avatarUrl={c.avatar_url || undefined} size="sm" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">
+                {c.display_name || 'Anônimo'}
+              </p>
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <MessageCircle className="h-3 w-3" />
+                {c.answer_count} {c.answer_count === 1 ? 'resposta' : 'respostas'}
+              </p>
+            </div>
+          </Link>
         </motion.div>
       ))}
     </div>

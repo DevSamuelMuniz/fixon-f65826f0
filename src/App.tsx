@@ -30,6 +30,7 @@ import AdminProblemForm from "./pages/admin/AdminProblemForm";
 import AdminMessages from "./pages/admin/AdminMessages";
 import AuthPage from "./pages/AuthPage";
 import ProfilePage from "./pages/ProfilePage";
+import PublicProfilePage from "./pages/PublicProfilePage";
 import InstallPage from "./pages/InstallPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NewPasswordPage from "./pages/NewPasswordPage";
@@ -70,6 +71,7 @@ const App = () => (
             <Route path="/entrar" element={<AuthPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/perfil" element={<ProfilePage />} />
+            <Route path="/perfil/:userId" element={<PublicProfilePage />} />
             <Route path="/instalar" element={<InstallPage />} />
             <Route path="/recuperar-senha" element={<ResetPasswordPage />} />
             <Route path="/nova-senha" element={<NewPasswordPage />} />

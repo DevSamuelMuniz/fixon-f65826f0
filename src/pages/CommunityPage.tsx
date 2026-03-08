@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MessageCircle, Plus, Users, FolderOpen, TrendingUp, Clock, Eye, Pin, ChevronRight,
-  Search, X, Trophy,
+  Search, X, Trophy, Flame,
   Smartphone, Monitor, Wifi, AppWindow, HeartPulse, Apple, Sparkles, Moon, Cog, Zap,
   CircleStop, Circle, Droplets, Paintbrush, Armchair, Car, Wrench, Home, Lightbulb,
   type LucideIcon
@@ -19,6 +19,7 @@ import { useForumStats } from '@/hooks/useForum';
 import { useForumSearch } from '@/hooks/useForumSearch';
 import { useAuth } from '@/hooks/useAuth';
 import { TopContributors } from '@/components/community/TopContributors';
+import { TrendingTopics } from '@/components/community/TrendingTopics';
 import { cn } from '@/lib/utils';
 
 const iconMap: Record<string, LucideIcon> = {
@@ -304,6 +305,15 @@ export default function CommunityPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Trending Topics */}
+            <div className="bg-card border border-border rounded-xl p-5">
+              <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
+                <Flame className="h-5 w-5 text-orange-500" />
+                Em Alta esta Semana
+              </h3>
+              <TrendingTopics />
+            </div>
+
             {/* Top Contributors */}
             <div className="bg-card border border-border rounded-xl p-5">
               <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
