@@ -71,6 +71,7 @@ const App = () => (
             <Route path="/entrar" element={<AuthPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/perfil" element={<ProfilePage />} />
+            <Route path="/perfil/:userId" element={<PublicProfilePage />} />
             <Route path="/instalar" element={<InstallPage />} />
             <Route path="/recuperar-senha" element={<ResetPasswordPage />} />
             <Route path="/nova-senha" element={<NewPasswordPage />} />
