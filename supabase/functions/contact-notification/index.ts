@@ -103,7 +103,7 @@ serve(async (req) => {
           },
         ],
         from: {
-          email: CONTACT_NOTIFICATION_EMAIL,
+          email: SENDGRID_FROM_EMAIL,
           name: 'Fix-on Contato',
         },
         reply_to: {
