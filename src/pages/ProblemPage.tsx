@@ -105,6 +105,11 @@ export default function ProblemPage() {
         categorySlug={categorySlug || ''}
         problemSlug={problemSlug || ''}
       />
+      <SocialMetaTags
+        problem={problem}
+        categorySlug={categorySlug || ''}
+        problemSlug={problemSlug || ''}
+      />
       {/* Header */}
       <motion.div
         initial={{ opacity: 0 }}
