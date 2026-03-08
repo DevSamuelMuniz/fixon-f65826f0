@@ -156,7 +156,7 @@ export default function AuthPage() {
     <div className="min-h-screen bg-background flex overflow-hidden">
 
       {/* ─── Left Panel ─── */}
-      <div className="hidden lg:flex lg:w-[52%] xl:w-[55%] relative overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-blue-700 flex-col justify-between p-12 xl:p-16">
+      <div className="hidden lg:flex lg:w-[52%] xl:w-[55%] relative overflow-hidden bg-gradient-to-br from-primary to-primary/70 flex-col justify-between p-12 xl:p-16">
 
         {/* Decorative circles */}
         <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-white/5" />
