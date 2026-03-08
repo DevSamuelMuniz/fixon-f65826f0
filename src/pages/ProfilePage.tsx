@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
-  User, Mail, Edit2, Save, Loader2, Phone, MapPin, Camera,
+  User, Mail, Edit2, Save as SaveIcon, Loader2, Phone, MapPin, Camera,
   MessageCircle, CheckCircle2, ThumbsUp, Award, ArrowRight
 } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
