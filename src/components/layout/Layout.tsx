@@ -25,6 +25,7 @@ export function Layout({ children, title, description }: LayoutProps) {
       <Footer />
       <NicheSwitcher />
       <PWAInstallModal />
+      <CookieBanner />
     </div>
   );
 }
