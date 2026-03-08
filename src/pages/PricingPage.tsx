@@ -12,8 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { toast } from 'sonner';
 
-// Replace with your actual Stripe Price ID after creating the product in Stripe Dashboard
-const PREMIUM_PRICE_ID = 'price_placeholder';
+const PREMIUM_PRICE_ID = 'price_1T8oQbIT6F5mN9PEU1hhJZAI';
 
 const freeFeatures = [
   'Acesso a todas as soluções',
