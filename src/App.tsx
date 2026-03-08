@@ -31,7 +31,23 @@ import AuthPage from "./pages/AuthPage";
 import ProfilePage from "./pages/ProfilePage";
 import InstallPage from "./pages/InstallPage";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+    },
+  },
+});
+
+// Global error handler
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', (e) => {
+    console.error('[App Error]', e.message, e.filename, e.lineno);
+  });
+  window.addEventListener('unhandledrejection', (e) => {
+    console.error('[App Promise Error]', e.reason);
+  });
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
