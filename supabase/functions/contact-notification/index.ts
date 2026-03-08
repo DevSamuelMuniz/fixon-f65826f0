@@ -21,6 +21,9 @@ serve(async (req) => {
       throw new Error('CONTACT_NOTIFICATION_EMAIL não configurado');
     }
 
+    // Remetente verificado no SendGrid (Sender Identity)
+    const SENDGRID_FROM_EMAIL = Deno.env.get('SENDGRID_FROM_EMAIL') || CONTACT_NOTIFICATION_EMAIL;
+
     const payload = await req.json();
 
     // Supabase Database Webhook payload
