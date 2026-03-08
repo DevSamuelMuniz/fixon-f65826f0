@@ -2,6 +2,7 @@ import { ReactNode, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, FileText, FolderOpen, LogOut, Home, Mail } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { Button } from '@/components/ui/button';
 import logo from '@/assets/logo.png';
 import { cn } from '@/lib/utils';
