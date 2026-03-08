@@ -27,6 +27,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProblems from "./pages/admin/AdminProblems";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminProblemForm from "./pages/admin/AdminProblemForm";
+import AdminMessages from "./pages/admin/AdminMessages";
 import AuthPage from "./pages/AuthPage";
 import ProfilePage from "./pages/ProfilePage";
 import InstallPage from "./pages/InstallPage";
