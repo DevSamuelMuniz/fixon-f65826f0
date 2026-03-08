@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   ArrowLeft, MessageCircle, Clock, ThumbsUp, CheckCircle2, Send, 
-  Eye, Pin, LogIn, Sparkles, FolderOpen, Hash, AtSign, ImagePlus
+  Eye, Pin, LogIn, Sparkles, FolderOpen, Hash, Share2, SortAsc
 } from 'lucide-react';
 import { z } from 'zod';
 import { Layout } from '@/components/layout/Layout';
@@ -17,11 +17,15 @@ import { useForumQuestion, useCreateAnswer, useToggleUpvote, useUserUpvotes, use
 import { useMultipleUserBadges } from '@/hooks/useUserBadges';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
-import { RichTextInput, RichTextDisplay, ImageUpload, ImageGallery, UserBadges, type BadgeType } from '@/components/community';
+import { RichTextInput, RichTextDisplay, ImageUpload, ImageGallery, UserBadges } from '@/components/community';
 
 const commentSchema = z.object({
   content: z.string().min(5, 'Comentário muito curto (mínimo 5 caracteres)').max(5000, 'Comentário muito longo'),
 });
+
+const MAX_CHARS = 5000;
+
+type SortMode = 'best' | 'newest' | 'oldest';
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('pt-BR', { 
@@ -55,8 +59,8 @@ export default function TopicDetailPage() {
   const answerIds = topic?.answers?.map(a => a.id) || [];
   const { data: userUpvotes } = useUserUpvotes(answerIds);
   const incrementView = useIncrementViewCount();
+  const [sortMode, setSortMode] = useState<SortMode>('best');
   
-  // Get all user IDs from topic and answers for badge lookup
   const allUserIds = [
     topic?.user_id,
     ...(topic?.answers?.map(a => a.user_id) || [])
@@ -72,7 +76,6 @@ export default function TopicDetailPage() {
   const [commentMentions, setCommentMentions] = useState<string[]>([]);
   const [error, setError] = useState('');
 
-  // Increment view count on first load
   useEffect(() => {
     if (topicId) {
       incrementView.mutate(topicId);
@@ -130,6 +133,33 @@ export default function TopicDetailPage() {
     }
   };
 
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      toast({ title: 'Link copiado!', description: 'O link do tópico foi copiado para a área de transferência.' });
+    });
+  };
+
+  const sortedAnswers = () => {
+    if (!topic?.answers) return [];
+    const answers = [...topic.answers];
+    
+    if (sortMode === 'best') {
+      return answers.sort((a, b) => {
+        if (a.is_solution && !b.is_solution) return -1;
+        if (!a.is_solution && b.is_solution) return 1;
+        return b.upvote_count - a.upvote_count;
+      });
+    }
+    if (sortMode === 'newest') {
+      return answers.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    }
+    // oldest
+    return answers.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+  };
+
+  // Can the current user mark a solution? Admin OR topic author
+  const canMarkSolution = isAdmin || (user && topic?.user_id === user.id);
+
   if (isLoading) {
     return (
       <Layout>
@@ -167,14 +197,20 @@ export default function TopicDetailPage() {
   return (
     <Layout>
       <div className="container max-w-4xl px-4 py-8">
-        {/* Back link */}
-        <Link
-          to={topic.category ? `/comunidade/${topic.category.slug}` : "/comunidade"}
-          className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-6"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Voltar para {topic.category?.name || 'comunidade'}
-        </Link>
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-1 text-sm text-muted-foreground mb-6">
+          <Link to="/comunidade" className="hover:text-primary transition-colors">Comunidade</Link>
+          {topic.category && (
+            <>
+              <span>/</span>
+              <Link to={`/comunidade/${topic.category.slug}`} className="hover:text-primary transition-colors">
+                {topic.category.name}
+              </Link>
+            </>
+          )}
+          <span>/</span>
+          <span className="text-foreground font-medium line-clamp-1">{topic.title}</span>
+        </nav>
 
         {/* Topic Card */}
         <motion.div
@@ -185,7 +221,6 @@ export default function TopicDetailPage() {
             topic.is_pinned ? "border-amber-500/30" : "border-border"
           )}
         >
-          {/* Pinned badge */}
           {topic.is_pinned && (
             <div className="flex items-center gap-2 mb-4">
               <Badge className="bg-amber-500 text-white">
@@ -195,7 +230,6 @@ export default function TopicDetailPage() {
             </div>
           )}
           
-          {/* Author header */}
           <div className="flex items-start gap-4 mb-4">
             <UserAvatar 
               name={topic.author_name} 
@@ -207,7 +241,6 @@ export default function TopicDetailPage() {
                 <span className="font-semibold text-foreground">
                   {topic.author_name || 'Anônimo'}
                 </span>
-                {/* User Badges */}
                 {topic.user_id && userBadges?.[topic.user_id] && (
                   <UserBadges badges={userBadges[topic.user_id]} size="sm" maxDisplay={3} />
                 )}
@@ -229,14 +262,17 @@ export default function TopicDetailPage() {
                 </span>
               </div>
             </div>
+            {/* Share button */}
+            <Button variant="ghost" size="sm" onClick={handleShare} className="gap-1.5 text-muted-foreground hover:text-foreground flex-shrink-0">
+              <Share2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Compartilhar</span>
+            </Button>
           </div>
 
-          {/* Title */}
           <h1 className="text-xl md:text-2xl font-bold text-foreground mb-4 leading-tight">
             {topic.title}
           </h1>
           
-          {/* Description */}
           <div className="prose prose-sm max-w-none mb-4">
             <RichTextDisplay 
               content={topic.description}
@@ -244,14 +280,12 @@ export default function TopicDetailPage() {
             />
           </div>
 
-          {/* Images */}
           {topic.images && topic.images.length > 0 && (
             <div className="mb-4">
               <ImageGallery images={topic.images} />
             </div>
           )}
 
-          {/* Tags */}
           {topic.tags && topic.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
               {topic.tags.map((tag) => (
@@ -263,7 +297,6 @@ export default function TopicDetailPage() {
             </div>
           )}
 
-          {/* Category */}
           {topic.category && (
             <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border">
               <Badge variant="outline" className="gap-1 bg-primary/5 border-primary/20 text-primary">
@@ -276,111 +309,121 @@ export default function TopicDetailPage() {
 
         {/* Comments Section */}
         <div className="mb-8">
-          <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-            <MessageCircle className="h-5 w-5 text-primary" />
-            {topic.answer_count} {topic.answer_count === 1 ? 'Comentário' : 'Comentários'}
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+              <MessageCircle className="h-5 w-5 text-primary" />
+              {topic.answer_count} {topic.answer_count === 1 ? 'Comentário' : 'Comentários'}
+            </h2>
+
+            {/* Sort select */}
+            {topic.answers && topic.answers.length > 1 && (
+              <div className="flex items-center gap-1 border border-border rounded-lg overflow-hidden text-xs">
+                {(['best', 'newest', 'oldest'] as SortMode[]).map(mode => (
+                  <button
+                    key={mode}
+                    onClick={() => setSortMode(mode)}
+                    className={cn(
+                      'px-3 py-1.5 transition-colors font-medium',
+                      sortMode === mode
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-muted-foreground hover:bg-muted'
+                    )}
+                  >
+                    {mode === 'best' ? 'Melhores' : mode === 'newest' ? 'Recentes' : 'Antigas'}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           {topic.answers && topic.answers.length > 0 ? (
             <div className="space-y-4">
-              {[...topic.answers]
-                .sort((a, b) => {
-                  if (a.is_solution && !b.is_solution) return -1;
-                  if (!a.is_solution && b.is_solution) return 1;
-                  return b.upvote_count - a.upvote_count;
-                })
-                .map((comment, index) => {
-                  const isUpvoted = userUpvotes?.includes(comment.id);
-                  
-                  return (
-                    <motion.div
-                      key={comment.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.03 }}
-                      className={cn(
-                        'relative p-5 rounded-xl border transition-all',
-                        comment.is_solution 
-                          ? 'bg-green-500/5 border-green-500/30 ring-1 ring-green-500/20' 
-                          : 'bg-card border-border'
-                      )}
-                    >
-                      {/* Solution badge */}
-                      {comment.is_solution && (
-                        <div className="absolute -top-3 left-4 flex items-center gap-1.5 px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full shadow-lg">
-                          <Sparkles className="h-3 w-3" />
-                          Melhor resposta
-                        </div>
-                      )}
-                      
-                      {/* Author info */}
-                      <div className="flex items-start gap-3 mb-3">
-                        <UserAvatar 
-                          name={comment.author_name} 
-                          size="sm"
-                          className="flex-shrink-0"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-medium text-foreground text-sm">
-                              {comment.author_name || 'Anônimo'}
-                            </span>
-                            {/* Comment Author Badges */}
-                            {comment.user_id && userBadges?.[comment.user_id] && (
-                              <UserBadges badges={userBadges[comment.user_id]} size="sm" maxDisplay={2} />
-                            )}
-                            <span className="text-xs text-muted-foreground">
-                              {formatTimeAgo(comment.created_at)}
-                            </span>
-                          </div>
-                        </div>
+              {sortedAnswers().map((comment, index) => {
+                const isUpvoted = userUpvotes?.includes(comment.id);
+                return (
+                  <motion.div
+                    key={comment.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.03 }}
+                    className={cn(
+                      'relative p-5 rounded-xl border transition-all',
+                      comment.is_solution 
+                        ? 'bg-green-500/5 border-green-500/30 ring-1 ring-green-500/20' 
+                        : 'bg-card border-border'
+                    )}
+                  >
+                    {comment.is_solution && (
+                      <div className="absolute -top-3 left-4 flex items-center gap-1.5 px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full shadow-lg">
+                        <Sparkles className="h-3 w-3" />
+                        Melhor resposta
                       </div>
-                      
-                      {/* Content */}
-                      <div className="mb-4 pl-11">
-                        <RichTextDisplay 
-                          content={comment.content}
-                          className="text-foreground/90"
-                        />
-                        {/* Comment Images */}
-                        {comment.images && comment.images.length > 0 && (
-                          <div className="mt-3">
-                            <ImageGallery images={comment.images} />
-                          </div>
-                        )}
-                      </div>
-                      {/* Actions */}
-                      <div className="flex items-center justify-between pl-11">
-                        <Button
-                          variant={isUpvoted ? "default" : "ghost"}
-                          size="sm"
-                          onClick={() => handleUpvote(comment.id)}
-                          className={cn(
-                            'gap-1.5 h-8 px-3',
-                            isUpvoted 
-                              ? 'bg-primary/10 text-primary hover:bg-primary/20' 
-                              : 'text-muted-foreground hover:text-foreground'
+                    )}
+                    
+                    <div className="flex items-start gap-3 mb-3">
+                      <UserAvatar 
+                        name={comment.author_name} 
+                        size="sm"
+                        className="flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-medium text-foreground text-sm">
+                            {comment.author_name || 'Anônimo'}
+                          </span>
+                          {comment.user_id && userBadges?.[comment.user_id] && (
+                            <UserBadges badges={userBadges[comment.user_id]} size="sm" maxDisplay={2} />
                           )}
-                        >
-                          <ThumbsUp className={cn('h-4 w-4', isUpvoted && 'fill-current')} />
-                          <span className="font-medium">{comment.upvote_count}</span>
-                        </Button>
-                        
-                        {isAdmin && !comment.is_solution && topic.status === 'open' && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleMarkSolution(comment.id)}
-                            className="gap-1.5 h-8 text-green-600 border-green-500/30 hover:bg-green-500/10"
-                          >
-                            <CheckCircle2 className="h-4 w-4" />
-                            Marcar solução
-                          </Button>
-                        )}
+                          <span className="text-xs text-muted-foreground">
+                            {formatTimeAgo(comment.created_at)}
+                          </span>
+                        </div>
                       </div>
-                    </motion.div>
-                  );
-                })}
+                    </div>
+                    
+                    <div className="mb-4 pl-11">
+                      <RichTextDisplay 
+                        content={comment.content}
+                        className="text-foreground/90"
+                      />
+                      {comment.images && comment.images.length > 0 && (
+                        <div className="mt-3">
+                          <ImageGallery images={comment.images} />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between pl-11">
+                      <Button
+                        variant={isUpvoted ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => handleUpvote(comment.id)}
+                        className={cn(
+                          'gap-1.5 h-8 px-3',
+                          isUpvoted 
+                            ? 'bg-primary/10 text-primary hover:bg-primary/20' 
+                            : 'text-muted-foreground hover:text-foreground'
+                        )}
+                      >
+                        <ThumbsUp className={cn('h-4 w-4', isUpvoted && 'fill-current')} />
+                        <span className="font-medium">{comment.upvote_count}</span>
+                      </Button>
+                      
+                      {canMarkSolution && !comment.is_solution && topic.status === 'open' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleMarkSolution(comment.id)}
+                          className="gap-1.5 h-8 text-green-600 border-green-500/30 hover:bg-green-500/10"
+                        >
+                          <CheckCircle2 className="h-4 w-4" />
+                          Marcar solução
+                        </Button>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-12 bg-muted/30 rounded-xl border border-dashed border-border">
@@ -422,12 +465,12 @@ export default function TopicDetailPage() {
                       placeholder="Compartilhe sua experiência ou ajude com uma resposta... Use @nome para mencionar e #tag para hashtags"
                       minHeight="100px"
                       error={!!error}
+                      maxChars={MAX_CHARS}
                     />
                     {error && (
                       <p className="text-sm text-destructive">{error}</p>
                     )}
                     
-                    {/* Image upload for comment */}
                     <ImageUpload
                       images={commentImages}
                       onChange={setCommentImages}
