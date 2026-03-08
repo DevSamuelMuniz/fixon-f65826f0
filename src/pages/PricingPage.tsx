@@ -45,11 +45,6 @@ export default function PricingPage() {
       return;
     }
 
-    if (PREMIUM_PRICE_ID === 'price_placeholder') {
-      toast.error('Configure o Price ID do Stripe primeiro. Veja as instruções abaixo.');
-      return;
-    }
-
     setCheckoutLoading(true);
     try {
       const { url } = await createCheckout(PREMIUM_PRICE_ID);
