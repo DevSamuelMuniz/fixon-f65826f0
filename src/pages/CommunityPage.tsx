@@ -20,6 +20,7 @@ import { useForumSearch } from '@/hooks/useForumSearch';
 import { useAuth } from '@/hooks/useAuth';
 import { TopContributors } from '@/components/community/TopContributors';
 import { TrendingTopics } from '@/components/community/TrendingTopics';
+import { usePremiumUsers } from '@/hooks/usePremiumUsers';
 import { cn } from '@/lib/utils';
 
 const iconMap: Record<string, LucideIcon> = {
