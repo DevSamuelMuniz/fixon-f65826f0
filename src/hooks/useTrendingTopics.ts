@@ -20,14 +20,26 @@ export function useTrendingTopics(limit = 5) {
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-      const { data, error } = await supabase
+      // Try last 7 days first
+      let { data, error } = await supabase
         .from('forum_questions')
         .select('id, title, answer_count, view_count, status, created_at, last_activity_at, author_name')
         .gte('last_activity_at', sevenDaysAgo.toISOString())
         .order('answer_count', { ascending: false })
-        .limit(limit * 2); // over-fetch to compute score
+        .limit(limit * 2);
 
       if (error) throw error;
+
+      // Fallback: if no recent activity, show all-time top topics
+      if (!data || data.length === 0) {
+        const fallback = await supabase
+          .from('forum_questions')
+          .select('id, title, answer_count, view_count, status, created_at, last_activity_at, author_name')
+          .order('answer_count', { ascending: false })
+          .limit(limit * 2);
+        if (fallback.error) throw fallback.error;
+        data = fallback.data;
+      }
 
       // Compute trending score: answers weighted 3x + views
       const scored = (data || []).map(t => ({
