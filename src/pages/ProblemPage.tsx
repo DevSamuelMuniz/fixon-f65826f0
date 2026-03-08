@@ -99,6 +99,11 @@ export default function ProblemPage() {
 
   return (
     <Layout>
+      <HowToJsonLd
+        problem={problem}
+        categorySlug={categorySlug || ''}
+        problemSlug={problemSlug || ''}
+      />
       {/* Header */}
       <motion.div
         initial={{ opacity: 0 }}
