@@ -1,5 +1,5 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { AtSign, Hash, X } from 'lucide-react';
+import { useState, useRef, useCallback } from 'react';
+import { AtSign, Hash } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
@@ -17,6 +17,7 @@ interface RichTextInputProps {
   minHeight?: string;
   disabled?: boolean;
   error?: boolean;
+  maxChars?: number;
 }
 
 export function RichTextInput({
@@ -27,6 +28,7 @@ export function RichTextInput({
   minHeight = '100px',
   disabled = false,
   error = false,
+  maxChars,
 }: RichTextInputProps) {
   const [showMentions, setShowMentions] = useState(false);
   const [mentionQuery, setMentionQuery] = useState('');
@@ -35,42 +37,30 @@ export function RichTextInput({
   const [mentionedUsers, setMentionedUsers] = useState<string[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Extract mentions from text
   const extractMentions = useCallback((text: string): string[] => {
     const mentionRegex = /@(\w+)/g;
     const matches = text.match(mentionRegex);
     return matches ? matches.map(m => m.slice(1)) : [];
   }, []);
 
-  // Search for users to mention
   const searchUsers = useCallback(async (query: string) => {
-    if (query.length < 2) {
-      setSuggestions([]);
-      return;
-    }
-
+    if (query.length < 2) { setSuggestions([]); return; }
     try {
       const { data, error } = await supabase
         .from('profiles_public')
         .select('user_id, display_name')
         .ilike('display_name', `%${query}%`)
         .limit(5);
-
       if (error) throw error;
       setSuggestions(data || []);
-    } catch (err) {
-      console.error('Error searching users:', err);
-      setSuggestions([]);
-    }
+    } catch { setSuggestions([]); }
   }, []);
 
-  // Handle text change
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newValue = e.target.value;
+    const newValue = maxChars ? e.target.value.slice(0, maxChars) : e.target.value;
     const cursor = e.target.selectionStart;
     setCursorPosition(cursor);
 
-    // Check if user is typing a mention
     const textBeforeCursor = newValue.slice(0, cursor);
     const mentionMatch = textBeforeCursor.match(/@(\w*)$/);
 
@@ -83,46 +73,33 @@ export function RichTextInput({
       setMentionQuery('');
     }
 
-    // Extract all mentions and update
     const mentions = extractMentions(newValue);
     setMentionedUsers(mentions);
     onChange(newValue, mentions);
   };
 
-  // Insert mention
   const insertMention = (user: MentionSuggestion) => {
     if (!textareaRef.current) return;
-
     const textBeforeCursor = value.slice(0, cursorPosition);
     const textAfterCursor = value.slice(cursorPosition);
-    
-    // Find where the @ started
     const mentionStart = textBeforeCursor.lastIndexOf('@');
     const beforeMention = value.slice(0, mentionStart);
-    
     const newText = `${beforeMention}@${user.display_name} ${textAfterCursor}`;
     const newMentions = extractMentions(newText);
-    
     setMentionedUsers(newMentions);
     onChange(newText, newMentions);
     setShowMentions(false);
     setMentionQuery('');
-    
-    // Focus back on textarea
     setTimeout(() => textareaRef.current?.focus(), 0);
   };
 
-  // Insert hashtag helper
   const insertHashtag = () => {
     if (!textareaRef.current) return;
-    
     const cursor = textareaRef.current.selectionStart;
     const before = value.slice(0, cursor);
     const after = value.slice(cursor);
     const newValue = `${before}#${after}`;
-    
     onChange(newValue, mentionedUsers);
-    
     setTimeout(() => {
       if (textareaRef.current) {
         textareaRef.current.focus();
@@ -131,20 +108,16 @@ export function RichTextInput({
     }, 0);
   };
 
-  // Insert mention helper
   const insertMentionSymbol = () => {
     if (!textareaRef.current) return;
-    
     const cursor = textareaRef.current.selectionStart;
     const before = value.slice(0, cursor);
     const after = value.slice(cursor);
     const newValue = `${before}@${after}`;
-    
     setCursorPosition(cursor + 1);
     setShowMentions(true);
     setMentionQuery('');
     onChange(newValue, mentionedUsers);
-    
     setTimeout(() => {
       if (textareaRef.current) {
         textareaRef.current.focus();
@@ -152,6 +125,10 @@ export function RichTextInput({
       }
     }, 0);
   };
+
+  const charCount = value.length;
+  const isNearLimit = maxChars && charCount >= maxChars * 0.85;
+  const isAtLimit = maxChars && charCount >= maxChars;
 
   return (
     <div className="relative">
@@ -175,6 +152,14 @@ export function RichTextInput({
         >
           <Hash className="h-4 w-4" />
         </button>
+        {maxChars && (
+          <span className={cn(
+            'ml-auto text-xs tabular-nums transition-colors',
+            isAtLimit ? 'text-destructive font-medium' : isNearLimit ? 'text-amber-500' : 'text-muted-foreground'
+          )}>
+            {charCount}/{maxChars}
+          </span>
+        )}
       </div>
 
       {/* Textarea */}
@@ -188,6 +173,7 @@ export function RichTextInput({
         className={cn(
           'resize-none',
           error && 'border-destructive focus-visible:ring-destructive',
+          isAtLimit && 'border-destructive/50',
           className
         )}
       />
@@ -232,17 +218,14 @@ export function RichTextInput({
   );
 }
 
-// Helper component to render text with highlighted mentions and hashtags
 interface RichTextDisplayProps {
   content: string;
   className?: string;
 }
 
 export function RichTextDisplay({ content, className }: RichTextDisplayProps) {
-  // Parse and highlight mentions and hashtags
   const renderContent = () => {
     const parts = content.split(/(@\w+|#\w+)/g);
-    
     return parts.map((part, index) => {
       if (part.startsWith('@')) {
         return (

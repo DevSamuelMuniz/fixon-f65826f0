@@ -1,108 +1,130 @@
 
-## Análise Completa da Comunidade
+# Plano: Sistema de Anúncios Multi-Nicho
 
-### O que existe hoje:
-- `/comunidade` — hub com categorias e tópicos recentes
-- `/comunidade/:slug` — tópicos por categoria
-- `/comunidade/todos` (ForumPage) — listagem geral com filtros
-- `/comunidade/topico/:id` — detalhe do tópico com comentários
-- `/comunidade/novo-topico` — criar tópico
-- `/perfil` — perfil do usuário (básico)
-- Sistema de badges, upvotes, menções, hashtags, imagens
+## Visão Geral
 
-### O que está faltando / pode melhorar:
-
-**1. Engajamento e descoberta**
-- Sem barra de busca na comunidade — usuário não consegue pesquisar tópicos
-- Sem "Tópicos em Alta" / trending (ordenação por atividade recente + respostas)
-- Sem sugestão de tópicos similares dentro de um tópico
-- Lista de tópicos recentes no hub usa só 10 itens sem paginação
-
-**2. UX do tópico**
-- Autor do tópico não pode marcar a própria resposta como solução — só admin pode
-- Sem botão de "Compartilhar" no tópico
-- Sem breadcrumb navegável dentro do detalhe
-- Não há feedback de "digitando" enquanto o form é preenchido (contador de caracteres)
-- Sem ordenação dos comentários (mais votados / cronológico / mais recente)
-
-**3. Perfil do usuário**
-- Perfil não mostra histórico de tópicos e respostas do usuário
-- Não exibe badges do usuário no perfil
-- Sem upload de foto de perfil (avatar_url existe na tabela mas não é usado)
-- Sem estatísticas: n° perguntas, n° respostas, n° soluções
-
-**4. Gamificação**
-- Badges existem no banco mas não são concedidos automaticamente — nenhuma trigger/edge function para auto-award
-- Sem sistema de pontos/reputação visível
-
-**5. UI/Layout**
-- Hub da comunidade não tem seção de "Usuários Ativos" ou "Top Contribuidores"
-- ForumPage (/comunidade/todos) e CommunityPage (/comunidade) têm designs duplicados — poderia unificar
-- Sem dark/light theme consistency nos cards de tópico (já OK com Tailwind, mas layout de stats poderia ter mais destaque visual)
+Implementar um sistema de anúncios Google AdSense integrado à arquitetura multi-tenant, onde cada nicho (tech, health, auto, casa) utiliza seu próprio ID de AdSense e posicionamentos estratégicos de ads.
 
 ---
 
-## Plano de Melhorias
+## Componentes a Criar
 
-Agrupei em **4 blocos** priorizados por impacto:
+### 1. Componente Base de Anúncio
+**Arquivo:** `src/components/ads/AdUnit.tsx`
 
-### Bloco A — Busca e Navegação (Alto impacto)
-- Adicionar `SearchBar` específico da comunidade no hub `/comunidade`
-- Filtrar `forum_questions` por texto (title + description via ILIKE)
-- Novo hook `useForumSearch(query)` que busca em tempo real com debounce
+Componente reutilizável que:
+- Carrega o AdSense ID do nicho atual via `useNiche()`
+- Suporta diferentes formatos (banner, retângulo, in-article, sidebar)
+- Renderiza condicionalmente baseado na configuração de monetização
+- Inclui placeholder visual durante carregamento
 
-### Bloco B — UX do Tópico (Alto impacto)
-- Permitir que o **próprio autor** do tópico marque a melhor resposta (não só admin)
-  - Alterar condição em `TopicDetailPage`: `isAdmin || user?.id === topic.user_id`
-- Adicionar **contador de caracteres** no `RichTextInput`
-- Adicionar botão **"Compartilhar"** (copia URL para clipboard) no tópico
-- Adicionar **ordenação de comentários** (mais votados / cronológico) no detalhe
+### 2. Componentes Especializados
 
-### Bloco C — Perfil Completo (Médio impacto)
-- Reescrever `ProfilePage` com:
-  - Upload de foto de perfil (usar bucket `community-images` existente)
-  - Seção de badges do usuário (com `useUserBadges`)
-  - Histórico: últimas perguntas e respostas do usuário
-  - Stats: n° tópicos criados, n° respostas, n° upvotes recebidos
+| Componente | Uso | Formato |
+|------------|-----|---------|
+| `AdBanner.tsx` | Topo/rodapé de páginas | 728x90 / responsivo |
+| `AdInArticle.tsx` | Entre seções de conteúdo | 300x250 / nativo |
+| `AdSidebar.tsx` | Lateral em desktop | 300x600 / vertical |
 
-### Bloco D — Gamificação Automática (Médio impacto)
-- Criar edge function `auto-award-badges` chamada após INSERT em `forum_answers`
-  - Regras: 1ª resposta → `newcomer`, 5+ → `contributor`, 10+ → `helper`, 25+ → `expert`, 50+ → `guru`
-  - Regra: tópico marcado como solução → `problem_solver`
-- Adicionar trigger no banco que chama a edge function após INSERT em `forum_answers` e UPDATE em `forum_questions` (status = resolved)
+### 3. Script Loader
+**Arquivo:** `src/components/ads/AdSenseScript.tsx`
 
-### Bloco E — Hub visual melhorado (Menor impacto, bom apelo)
-- Adicionar seção **"Top Contribuidores"** no hub `/comunidade`
-  - Query: `forum_answers` GROUP BY `user_id`, ordenado por count
-  - Mostra avatar + nome + n° respostas
-- Adicionar **barra lateral** no desktop da listagem de tópicos com: categorias rápidas, tópicos em alta, CTA de cadastro
+Carrega o script do Google AdSense dinamicamente com o Publisher ID correto do nicho.
 
 ---
 
-## Plano Técnico de Implementação
+## Posicionamento dos Anúncios
+
+### Página Inicial (`Index.tsx`)
+- 1 banner após seção "Categorias"
+- 1 ad in-article antes da seção "Como funciona"
+
+### Página de Problema (`ProblemPage.tsx`)
+- 1 ad após "Resposta rápida"
+- 1 ad após os passos (antes de "Problemas relacionados")
+- 1 ad sidebar em desktop
+
+### Página de Categoria (`CategoryPage.tsx`)
+- 1 banner após lista de 3 problemas
+- 1 ad no final da página
+
+### Fórum (`ForumPage.tsx`)
+- 1 ad in-feed a cada 5 perguntas
+
+---
+
+## Configuração por Nicho
+
+A estrutura já existente em `src/config/niches/` será utilizada:
 
 ```text
-Alterações de banco:
-  - Nenhuma nova tabela necessária
-  - Nova edge function: supabase/functions/auto-award-badges/index.ts
-  - Trigger: após INSERT em forum_answers → chama auto-award-badges
-
-Novos arquivos:
-  src/hooks/useForumSearch.ts          — busca debounced em forum_questions
-  src/components/community/SearchBar.tsx — barra de busca da comunidade
-  src/components/community/TopContributors.tsx — widget top contribuidores
-  src/components/community/CommentSortSelect.tsx — controle de ordenação
-  supabase/functions/auto-award-badges/index.ts — auto concessão de badges
-
-Arquivos modificados:
-  src/pages/CommunityPage.tsx          — + busca, + top contribuidores
-  src/pages/TopicDetailPage.tsx        — + marcar solução pelo autor, + ordenação, + compartilhar, + contador chars
-  src/pages/ProfilePage.tsx            — reescrita com upload avatar, badges, histórico, stats
-  src/components/community/RichTextInput.tsx — + contador de caracteres
+monetization: {
+  adsenseId: 'ca-pub-XXXXX',  // ID único por nicho
+  affiliateLinks: {...},
+  leadCaptureEnabled: true,
+}
 ```
 
-### Pontos de atenção:
-- O bucket `community-images` já existe e é público — upload de avatar pode usar ele com path `avatars/{user_id}`
-- A coluna `avatar_url` já existe em `profiles` — só falta o UI de upload
-- A permissão de marcar solução precisa garantir que `user_id` seja comparado com segurança (já vem do auth, não do client)
-- A edge function de badges precisa do `SUPABASE_SERVICE_ROLE_KEY` (já configurado como secret)
+---
+
+## Arquivos a Criar/Modificar
+
+### Criar:
+1. `src/components/ads/AdUnit.tsx` - Componente base
+2. `src/components/ads/AdBanner.tsx` - Banner horizontal
+3. `src/components/ads/AdInArticle.tsx` - Ad nativo em conteúdo
+4. `src/components/ads/AdSidebar.tsx` - Ad vertical lateral
+5. `src/components/ads/AdSenseScript.tsx` - Loader do script
+6. `src/components/ads/index.ts` - Exports
+
+### Modificar:
+1. `src/components/layout/Layout.tsx` - Adicionar AdSenseScript
+2. `src/pages/Index.tsx` - Inserir ads nas posições
+3. `src/pages/ProblemPage.tsx` - Inserir ads nas posições
+4. `src/pages/CategoryPage.tsx` - Inserir ads nas posições
+5. `src/pages/ForumPage.tsx` - Inserir ads in-feed
+
+---
+
+## Detalhes Técnicos
+
+### Estrutura do AdUnit
+
+O componente base detectará o nicho e renderizará:
+
+```text
+┌─────────────────────────────────────┐
+│  [AdUnit]                           │
+│  - Detecta nicho via useNiche()     │
+│  - Pega adsenseId da config         │
+│  - Renderiza slot do Google Ads     │
+│  - Fallback: placeholder ou nada    │
+└─────────────────────────────────────┘
+```
+
+### Formatos Suportados
+
+| Formato | Dimensões | Uso |
+|---------|-----------|-----|
+| `banner` | 728x90, 320x50 (mobile) | Header/Footer |
+| `rectangle` | 300x250 | Conteúdo |
+| `vertical` | 300x600 | Sidebar |
+| `in-article` | Responsivo | Entre parágrafos |
+| `in-feed` | Nativo | Listas |
+
+### Responsividade
+
+Os ads serão adaptados para mobile:
+- Banner desktop (728x90) → mobile (320x50)
+- Sidebar oculta em mobile
+- In-article mantém proporção
+
+---
+
+## Considerações de Performance
+
+- Scripts carregados de forma assíncrona
+- Ads renderizados após conteúdo principal
+- Lazy loading para ads abaixo da dobra
+- Sem impacto em Core Web Vitals
+
