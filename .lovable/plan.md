@@ -1,130 +1,95 @@
 
-# Plano: Sistema de Anúncios Multi-Nicho
+## Análise completa do estado atual
 
-## Visão Geral
+**O que já está pronto:**
+- 177 problemas com soluções em 8 passos
+- Sistema de categorias e busca
+- Painel admin (CRUD de problemas e categorias)
+- Autenticação (login/cadastro/perfil)
+- Fórum/Comunidade com tópicos e respostas
+- SEO: JSON-LD HowTo, Open Graph, sitemap dinâmico
+- PWA (instalável)
+- Google Analytics 4 já configurado no `index.html` (G-FXYX4KKT7Z)
+- Google AdSense já no `index.html`
+- Sistema de nichos (multi-domínio)
+- Página de privacidade e termos
 
-Implementar um sistema de anúncios Google AdSense integrado à arquitetura multi-tenant, onde cada nicho (tech, health, auto, casa) utiliza seu próprio ID de AdSense e posicionamentos estratégicos de ads.
+**O que ainda falta para o sistema estar completo:**
 
----
+### 1. Recuperação de senha (crítico)
+`useAuth.ts` não tem `resetPassword`. O `AuthPage.tsx` não tem link "Esqueci minha senha". Usuários que esquecem a senha ficam bloqueados.
 
-## Componentes a Criar
+### 2. Banner de cookies/LGPD (crítico para AdSense)
+Nenhum componente de cookie consent existe no projeto. O Google AdSense exige consentimento explícito para usuários da UE/Brasil (LGPD). Sem ele, risco de suspensão da conta AdSense.
 
-### 1. Componente Base de Anúncio
-**Arquivo:** `src/components/ads/AdUnit.tsx`
+### 3. Formulário de contato não funciona de verdade
+`ContactPage.tsx` linha 21: `await new Promise(resolve => setTimeout(resolve, 1000))` — é apenas uma simulação. Mensagens nunca chegam a lugar nenhum.
 
-Componente reutilizável que:
-- Carrega o AdSense ID do nicho atual via `useNiche()`
-- Suporta diferentes formatos (banner, retângulo, in-article, sidebar)
-- Renderiza condicionalmente baseado na configuração de monetização
-- Inclui placeholder visual durante carregamento
+### 4. Redirecionamento após confirmar email
+Após cadastro, o usuário recebe email de confirmação. O `redirectUrl` aponta para `/` mas não há mensagem de boas-vindas ou indicação de que o email foi confirmado com sucesso.
 
-### 2. Componentes Especializados
-
-| Componente | Uso | Formato |
-|------------|-----|---------|
-| `AdBanner.tsx` | Topo/rodapé de páginas | 728x90 / responsivo |
-| `AdInArticle.tsx` | Entre seções de conteúdo | 300x250 / nativo |
-| `AdSidebar.tsx` | Lateral em desktop | 300x600 / vertical |
-
-### 3. Script Loader
-**Arquivo:** `src/components/ads/AdSenseScript.tsx`
-
-Carrega o script do Google AdSense dinamicamente com o Publisher ID correto do nicho.
-
----
-
-## Posicionamento dos Anúncios
-
-### Página Inicial (`Index.tsx`)
-- 1 banner após seção "Categorias"
-- 1 ad in-article antes da seção "Como funciona"
-
-### Página de Problema (`ProblemPage.tsx`)
-- 1 ad após "Resposta rápida"
-- 1 ad após os passos (antes de "Problemas relacionados")
-- 1 ad sidebar em desktop
-
-### Página de Categoria (`CategoryPage.tsx`)
-- 1 banner após lista de 3 problemas
-- 1 ad no final da página
-
-### Fórum (`ForumPage.tsx`)
-- 1 ad in-feed a cada 5 perguntas
+### 5. Página de erro 404 customizada
+Existe `NotFound.tsx` mas é muito básico — sem sugestões de conteúdo relacionado ou botão de busca visível.
 
 ---
 
-## Configuração por Nicho
+## Plano de implementação — o que falta para estar completo
 
-A estrutura já existente em `src/config/niches/` será utilizada:
+### Prioridade 1 — Funcional/Crítico
+
+**A) Recuperar senha**
+- Adicionar link "Esqueci minha senha" em `AuthPage.tsx`
+- Adicionar método `resetPassword(email)` em `useAuth.ts`
+- Criar página `/recuperar-senha` para confirmar o envio do email
+- Criar página `/nova-senha` para receber o token e permitir nova senha
+- Adicionar rota em `App.tsx`
+
+**B) Cookie consent LGPD**
+- Criar componente `CookieBanner` persistente no rodapé
+- Salvar preferência em `localStorage`
+- Bloquear scripts de analytics/ads até consentimento (opcional granular)
+- Adicionar ao `Layout.tsx`
+
+**C) Formulário de contato funcional**
+- Criar edge function `send-contact-email` usando o `LOVABLE_API_KEY` ou salvar mensagens em tabela `contact_messages` no banco
+- Migração de banco: tabela `contact_messages` (id, name, email, message, created_at)
+- Atualizar `ContactPage.tsx` para salvar no banco
+
+### Prioridade 2 — UX/Polimento
+
+**D) 404 melhorado**
+- Adicionar barra de busca na página 404
+- Mostrar categorias populares como sugestão
+
+**E) Email de boas-vindas pós-confirmação**
+- Detectar parâmetro `?confirmed=true` na URL e exibir toast de boas-vindas
+
+---
+
+## Arquivos afetados
 
 ```text
-monetization: {
-  adsenseId: 'ca-pub-XXXXX',  // ID único por nicho
-  affiliateLinks: {...},
-  leadCaptureEnabled: true,
-}
+src/hooks/useAuth.ts              — adicionar resetPassword()
+src/pages/AuthPage.tsx            — link "esqueci minha senha"
+src/pages/ResetPasswordPage.tsx   — nova página (solicitar reset)
+src/pages/NewPasswordPage.tsx     — nova página (definir nova senha)
+src/components/CookieBanner.tsx   — novo componente LGPD
+src/components/layout/Layout.tsx  — incluir CookieBanner
+src/pages/ContactPage.tsx         — formulário real
+src/pages/NotFound.tsx            — 404 melhorado
+src/App.tsx                       — novas rotas
+supabase/migrations/              — tabela contact_messages (opcional)
 ```
 
 ---
 
-## Arquivos a Criar/Modificar
+## O que NÃO falta (já está feito)
 
-### Criar:
-1. `src/components/ads/AdUnit.tsx` - Componente base
-2. `src/components/ads/AdBanner.tsx` - Banner horizontal
-3. `src/components/ads/AdInArticle.tsx` - Ad nativo em conteúdo
-4. `src/components/ads/AdSidebar.tsx` - Ad vertical lateral
-5. `src/components/ads/AdSenseScript.tsx` - Loader do script
-6. `src/components/ads/index.ts` - Exports
-
-### Modificar:
-1. `src/components/layout/Layout.tsx` - Adicionar AdSenseScript
-2. `src/pages/Index.tsx` - Inserir ads nas posições
-3. `src/pages/ProblemPage.tsx` - Inserir ads nas posições
-4. `src/pages/CategoryPage.tsx` - Inserir ads nas posições
-5. `src/pages/ForumPage.tsx` - Inserir ads in-feed
-
----
-
-## Detalhes Técnicos
-
-### Estrutura do AdUnit
-
-O componente base detectará o nicho e renderizará:
-
-```text
-┌─────────────────────────────────────┐
-│  [AdUnit]                           │
-│  - Detecta nicho via useNiche()     │
-│  - Pega adsenseId da config         │
-│  - Renderiza slot do Google Ads     │
-│  - Fallback: placeholder ou nada    │
-└─────────────────────────────────────┘
-```
-
-### Formatos Suportados
-
-| Formato | Dimensões | Uso |
-|---------|-----------|-----|
-| `banner` | 728x90, 320x50 (mobile) | Header/Footer |
-| `rectangle` | 300x250 | Conteúdo |
-| `vertical` | 300x600 | Sidebar |
-| `in-article` | Responsivo | Entre parágrafos |
-| `in-feed` | Nativo | Listas |
-
-### Responsividade
-
-Os ads serão adaptados para mobile:
-- Banner desktop (728x90) → mobile (320x50)
-- Sidebar oculta em mobile
-- In-article mantém proporção
-
----
-
-## Considerações de Performance
-
-- Scripts carregados de forma assíncrona
-- Ads renderizados após conteúdo principal
-- Lazy loading para ads abaixo da dobra
-- Sem impacto em Core Web Vitals
-
+- Google Analytics 4: já no `index.html` (linha 43-49)
+- Google AdSense: já no `index.html` (linha 52-58)
+- SEO completo: JSON-LD, Open Graph, sitemap
+- Auth: login, cadastro, perfil
+- Admin: dashboard, CRUD completo
+- PWA: instalável
+- Comunidade/Fórum: funcional
+- Privacidade e Termos: existem
