@@ -375,6 +375,8 @@ export default function CommunityPage() {
 
 function RecentTopicsList() {
   const { data: recentTopics, isLoading } = useForumStats();
+  const topicUserIds = recentTopics?.recentTopics?.map(t => t.user_id) || [];
+  const { data: premiumUsers } = usePremiumUsers(topicUserIds);
   
   if (isLoading) {
     return (
@@ -403,49 +405,58 @@ function RecentTopicsList() {
   
   return (
     <div className="space-y-3">
-      {recentTopics.recentTopics.map((topic, index) => (
-        <motion.div
-          key={topic.id}
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: index * 0.05 }}
-        >
-          <Link
-            to={`/comunidade/topico/${topic.id}`}
-            className="group flex items-center gap-4 p-4 bg-card border border-border rounded-xl hover:border-primary/50 transition-all"
+      {recentTopics.recentTopics.map((topic, index) => {
+        const isPremiumAuthor = topic.user_id ? premiumUsers?.has(topic.user_id) : false;
+        return (
+          <motion.div
+            key={topic.id}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.05 }}
           >
-            {topic.is_pinned && (
-              <Pin className="h-4 w-4 text-amber-500 flex-shrink-0" />
-            )}
-            <UserAvatar name={topic.author_name} size="sm" className="flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-medium text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                  {topic.title}
-                </h3>
-                {topic.status === 'resolved' && (
-                  <Badge variant="outline" className="text-xs bg-green-500/10 text-green-500 border-green-500/30">
-                    Resolvido
-                  </Badge>
-                )}
+            <Link
+              to={`/comunidade/topico/${topic.id}`}
+              className={cn(
+                "group flex items-center gap-4 p-4 bg-card border rounded-xl hover:border-primary/50 transition-all",
+                isPremiumAuthor ? "border-amber-400/50 shadow-sm" : "border-border"
+              )}
+            >
+              {topic.is_pinned && (
+                <Pin className="h-4 w-4 text-amber-500 flex-shrink-0" />
+              )}
+              <UserAvatar name={topic.author_name} size="sm" className="flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <h3 className="font-medium text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                    {topic.title}
+                  </h3>
+                  {isPremiumAuthor && (
+                    <Crown className="h-3.5 w-3.5 fill-amber-400 text-amber-400 flex-shrink-0" />
+                  )}
+                  {topic.status === 'resolved' && (
+                    <Badge variant="outline" className="text-xs bg-green-500/10 text-green-500 border-green-500/30">
+                      Resolvido
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground/80">{topic.author_name || 'Anônimo'}</span>
+                  <span>•</span>
+                  <span>{topic.category_name}</span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1">
+                    <MessageCircle className="h-3 w-3" />{topic.answer_count}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Eye className="h-3 w-3" />{topic.view_count || 0}
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                <span className="font-medium text-foreground/80">{topic.author_name || 'Anônimo'}</span>
-                <span>•</span>
-                <span>{topic.category_name}</span>
-                <span>•</span>
-                <span className="flex items-center gap-1">
-                  <MessageCircle className="h-3 w-3" />{topic.answer_count}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Eye className="h-3 w-3" />{topic.view_count || 0}
-                </span>
-              </div>
-            </div>
-            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-          </Link>
-        </motion.div>
-      ))}
+              <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+            </Link>
+          </motion.div>
+        );
+      })}
     </div>
   );
 }
