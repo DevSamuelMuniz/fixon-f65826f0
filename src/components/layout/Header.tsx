@@ -97,7 +97,7 @@ export function Header() {
           </Link>
         </nav>
 
-        {/* Right side: Search + User + Mobile Menu */}
+        {/* Right side: Search + Notifications + User + Mobile Menu */}
         <div className="flex items-center gap-2">
           <Link to="/buscar">
             <Button variant="ghost" size="icon" className="min-h-10 min-w-10 hover:bg-primary/10">
@@ -105,6 +105,9 @@ export function Header() {
               <span className="sr-only">Buscar</span>
             </Button>
           </Link>
+
+          {/* Notification Bell (only for logged-in users) */}
+          {user && <NotificationBell />}
 
           {/* User Menu */}
           {user ? (
