@@ -12,8 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { toast } from 'sonner';
 
-// Replace with your actual Stripe Price ID after creating the product in Stripe Dashboard
-const PREMIUM_PRICE_ID = 'price_placeholder';
+const PREMIUM_PRICE_ID = 'price_1T8oQbIT6F5mN9PEU1hhJZAI';
 
 const freeFeatures = [
   'Acesso a todas as soluções',
@@ -43,11 +42,6 @@ export default function PricingPage() {
   const handleSubscribe = async () => {
     if (!user) {
       navigate('/entrar?redirect=/premium');
-      return;
-    }
-
-    if (PREMIUM_PRICE_ID === 'price_placeholder') {
-      toast.error('Configure o Price ID do Stripe primeiro. Veja as instruções abaixo.');
       return;
     }
 
@@ -235,28 +229,7 @@ export default function PricingPage() {
           ))}
         </motion.div>
 
-        {/* Stripe setup instructions (only shown in dev/when price not configured) */}
-        {PREMIUM_PRICE_ID === 'price_placeholder' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="bg-amber-500/5 border border-amber-500/30 rounded-xl p-5 text-sm"
-          >
-            <div className="flex items-center gap-2 font-semibold text-amber-700 mb-3">
-              <Shield className="h-4 w-4" />
-              Configuração Stripe necessária
-            </div>
-            <ol className="space-y-1.5 text-muted-foreground list-decimal list-inside">
-              <li>Acesse o <a href="https://dashboard.stripe.com/products" target="_blank" rel="noopener noreferrer" className="text-primary underline">Stripe Dashboard → Products</a></li>
-              <li>Crie um produto chamado <strong>"FixOn Premium"</strong> com preço R$ 9,90/mês recorrente</li>
-              <li>Copie o <strong>Price ID</strong> (começa com <code>price_</code>) e substitua <code>price_placeholder</code> neste arquivo</li>
-              <li>Vá em <a href="https://dashboard.stripe.com/webhooks" target="_blank" rel="noopener noreferrer" className="text-primary underline">Stripe → Webhooks</a>, crie endpoint apontando para: <br /><code className="text-xs bg-muted px-1 py-0.5 rounded">https://dcvlrtxtepxmafiburip.supabase.co/functions/v1/stripe-webhook</code></li>
-              <li>Selecione os eventos: <code>checkout.session.completed</code>, <code>customer.subscription.updated</code>, <code>customer.subscription.deleted</code></li>
-              <li>Copie o <strong>Webhook Secret</strong> e adicione como secret chamado <strong>STRIPE_WEBHOOK_SECRET</strong> nas configurações do projeto</li>
-            </ol>
-          </motion.div>
-        )}
+        {/* Stripe setup instructions removed - price configured */}
 
         {/* FAQ */}
         <div className="mt-10 text-center">
