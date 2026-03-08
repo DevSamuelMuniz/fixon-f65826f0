@@ -110,6 +110,7 @@ export function useForumStats() {
         byCategory,
         recentTopics: (recentTopics || []).map((t: any) => ({
           ...t,
+          user_id: t.user_id || null,
           category_name: t.category?.name || 'Sem categoria',
         })),
       };
