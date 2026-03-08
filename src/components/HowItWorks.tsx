@@ -1,5 +1,6 @@
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, CheckCircle2, PartyPopper } from 'lucide-react';
+import { Search, CheckCircle2, PartyPopper, ArrowRight } from 'lucide-react';
 
 const steps = [
   {
