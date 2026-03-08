@@ -112,21 +112,31 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
         {/* Mobile Nav */}
         <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
           <nav className="flex justify-around p-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                to={item.href}
-                className={cn(
-                  'flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium',
-                  location.pathname === item.href
-                    ? 'text-primary'
-                    : 'text-muted-foreground'
-                )}
-              >
-                <item.icon className="h-5 w-5" />
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const isMensagens = item.href === '/admin/mensagens';
+              return (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className={cn(
+                    'relative flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium',
+                    location.pathname === item.href
+                      ? 'text-primary'
+                      : 'text-muted-foreground'
+                  )}
+                >
+                  <div className="relative">
+                    <item.icon className="h-5 w-5" />
+                    {isMensagens && unreadCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[9px] font-bold min-w-[14px] h-[14px] px-0.5">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </span>
+                    )}
+                  </div>
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
         </div>
 
