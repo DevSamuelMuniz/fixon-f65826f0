@@ -15,6 +15,7 @@ const navItems = [
   { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
   { label: 'Problemas', href: '/admin/problemas', icon: FileText },
   { label: 'Categorias', href: '/admin/categorias', icon: FolderOpen },
+  { label: 'Mensagens', href: '/admin/mensagens', icon: Mail },
 ];
 
 export function AdminLayout({ children, title }: AdminLayoutProps) {

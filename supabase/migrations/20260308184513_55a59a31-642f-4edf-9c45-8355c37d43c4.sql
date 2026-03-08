@@ -1,0 +1,1 @@
+CREATE POLICY "Admins podem atualizar mensagens" ON public.contact_messages FOR UPDATE USING (has_role(auth.uid(), 'admin'::app_role));
