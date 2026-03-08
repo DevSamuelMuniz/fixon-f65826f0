@@ -391,12 +391,14 @@ export default function AuthPage() {
               </div>
               {!isLogin && password.length > 0 && (
                 <div className="flex gap-1 mt-1.5">
-                  {[...Array(4)].map((_, i) => (
-                    <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${
-                      password.length >= [6, 8, 10, 12][i]
+        {[...Array(4)].map((_, i) => {
+                      const thresholds = [6, 8, 10, 12];
+                      const active = password.length >= thresholds[i];
+                      const colorClass = active
                         ? i < 2 ? 'bg-destructive' : i === 2 ? 'bg-yellow-400' : 'bg-green-500'
-                        : 'bg-muted'
-                    }`} />
+                        : 'bg-muted';
+                      return <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${colorClass}`} />;
+                    })
                   ))}
                 </div>
               )}
