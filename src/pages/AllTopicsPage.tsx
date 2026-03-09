@@ -256,13 +256,28 @@ export default function AllTopicsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.02 }}
                 >
+                  {(() => {
+                    const isPremiumAuthor = topic.user_id ? premiumUsers?.has(topic.user_id) : false;
+                    return (
                   <Link
                     to={`/comunidade/topico/${topic.id}`}
                     className={cn(
-                      "group flex gap-4 p-4 bg-card border rounded-xl hover:shadow-lg transition-all",
-                      topic.is_pinned ? "border-amber-500/30 bg-amber-500/5" : "border-border hover:border-primary/50"
+                      "group relative flex gap-4 p-4 bg-card border-2 rounded-xl hover:shadow-lg transition-all",
+                      isPremiumAuthor
+                        ? "border-amber-400 shadow-md shadow-amber-400/20 hover:border-amber-500 hover:shadow-amber-400/30"
+                        : topic.is_pinned
+                          ? "border-amber-500/30 bg-amber-500/5 hover:border-amber-500/60"
+                          : "border-border hover:border-primary/50"
                     )}
                   >
+                    {/* Premium badge */}
+                    {isPremiumAuthor && (
+                      <div className="absolute -top-2.5 left-3 flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full shadow-sm">
+                        <Crown className="h-3 w-3 text-amber-900 fill-amber-900" />
+                        <span className="text-[10px] font-bold text-amber-900 uppercase tracking-wide">Premium</span>
+                      </div>
+                    )}
+
                     {/* Pinned indicator */}
                     {topic.is_pinned && (
                       <div className="flex-shrink-0">
@@ -280,7 +295,10 @@ export default function AllTopicsPage() {
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2 mb-1">
-                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                        <h3 className={cn(
+                          "font-semibold transition-colors line-clamp-1",
+                          isPremiumAuthor ? "text-foreground group-hover:text-amber-600" : "text-foreground group-hover:text-primary"
+                        )}>
                           {topic.title}
                         </h3>
                         <div className="flex items-center gap-2 flex-shrink-0">
