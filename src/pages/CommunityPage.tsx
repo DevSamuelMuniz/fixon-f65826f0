@@ -417,22 +417,30 @@ function RecentTopicsList() {
             <Link
               to={`/comunidade/topico/${topic.id}`}
               className={cn(
-                "group flex items-center gap-4 p-4 bg-card border rounded-xl hover:border-primary/50 transition-all",
-                isPremiumAuthor ? "border-amber-400/50 shadow-sm" : "border-border"
+                "group relative flex items-center gap-4 p-4 bg-card border-2 rounded-xl transition-all",
+                isPremiumAuthor
+                  ? "border-amber-400 shadow-md shadow-amber-400/20 hover:border-amber-500 hover:shadow-amber-400/30"
+                  : "border-border hover:border-primary/50"
               )}
             >
+              {isPremiumAuthor && (
+                <div className="absolute -top-2.5 left-3 flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full shadow-sm">
+                  <Crown className="h-3 w-3 text-amber-900 fill-amber-900" />
+                  <span className="text-[10px] font-bold text-amber-900 uppercase tracking-wide">Premium</span>
+                </div>
+              )}
               {topic.is_pinned && (
                 <Pin className="h-4 w-4 text-amber-500 flex-shrink-0" />
               )}
               <UserAvatar name={topic.author_name} size="sm" className="flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <h3 className="font-medium text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                  <h3 className={cn(
+                    "font-medium transition-colors line-clamp-1",
+                    isPremiumAuthor ? "text-foreground group-hover:text-amber-600" : "text-foreground group-hover:text-primary"
+                  )}>
                     {topic.title}
                   </h3>
-                  {isPremiumAuthor && (
-                    <Crown className="h-3.5 w-3.5 fill-amber-400 text-amber-400 flex-shrink-0" />
-                  )}
                   {topic.status === 'resolved' && (
                     <Badge variant="outline" className="text-xs bg-green-500/10 text-green-500 border-green-500/30">
                       Resolvido
