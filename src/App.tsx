@@ -58,8 +58,9 @@ if (typeof window !== 'undefined') {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <NicheProvider>
+  <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+    <QueryClientProvider client={queryClient}>
+      <NicheProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
