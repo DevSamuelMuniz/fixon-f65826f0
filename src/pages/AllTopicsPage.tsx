@@ -54,6 +54,8 @@ export default function AllTopicsPage() {
   }), [statusFilter, categoryFilter, tagFilter]);
   
   const { data: topics, isLoading } = useForumQuestions(filters);
+  const topicUserIds = useMemo(() => topics?.map(t => t.user_id) ?? [], [topics]);
+  const { data: premiumUsers } = usePremiumUsers(topicUserIds);
   
   // Extract all unique tags from topics
   const allTags = useMemo(() => {
