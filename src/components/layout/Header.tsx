@@ -20,7 +20,7 @@ export function Header() {
   const { user, profile, signOut } = useAuth();
   const { niche } = useNiche();
   const { isPremium } = useSubscription();
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
 
   // Static menu items for navigation
   const menuItems = [
@@ -123,18 +123,18 @@ export function Header() {
             variant="ghost"
             size="icon"
             className="min-h-10 min-w-10 hover:bg-primary/10"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
             aria-label="Alternar tema"
           >
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
-                key={theme}
+                key={resolvedTheme}
                 initial={{ rotate: -90, opacity: 0, scale: 0.8 }}
                 animate={{ rotate: 0, opacity: 1, scale: 1 }}
                 exit={{ rotate: 90, opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.2 }}
               >
-                {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                {resolvedTheme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </motion.div>
             </AnimatePresence>
           </Button>
@@ -250,10 +250,10 @@ export function Header() {
                     variant="ghost"
                     size="icon"
                     className="h-9 w-9"
-                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                    onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
                     aria-label="Alternar tema"
                   >
-                    {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                    {resolvedTheme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                   </Button>
                 </div>
                 
