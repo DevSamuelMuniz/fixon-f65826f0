@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { NicheProvider } from "@/contexts/NicheContext";
+import { useAuth } from "@/hooks/useAuth";
+import { useThemeSync } from "@/hooks/useThemeSync";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import CategoryPage from "./pages/CategoryPage";
@@ -57,6 +59,14 @@ if (typeof window !== 'undefined') {
   });
 }
 
+
+/** Bridge component: lives inside ThemeProvider & BrowserRouter to call the sync hook */
+function ThemeSyncBridge() {
+  const { user } = useAuth();
+  useThemeSync(user?.id);
+  return null;
+}
+
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} storageKey="fixon-theme" disableTransitionOnChange>
     <QueryClientProvider client={queryClient}>
@@ -65,6 +75,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ThemeSyncBridge />
           <ScrollToTop />
           <Routes>
             <Route path="/" element={<Index />} />
