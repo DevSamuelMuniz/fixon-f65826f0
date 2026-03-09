@@ -65,10 +65,10 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
               aria-label="Alternar tema"
             >
-              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              {resolvedTheme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
             <Link to="/">
               <Button variant="ghost" size="sm">

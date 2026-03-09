@@ -123,18 +123,18 @@ export function Header() {
             variant="ghost"
             size="icon"
             className="min-h-10 min-w-10 hover:bg-primary/10"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
             aria-label="Alternar tema"
           >
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
-                key={theme}
+                key={resolvedTheme}
                 initial={{ rotate: -90, opacity: 0, scale: 0.8 }}
                 animate={{ rotate: 0, opacity: 1, scale: 1 }}
                 exit={{ rotate: 90, opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.2 }}
               >
-                {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                {resolvedTheme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </motion.div>
             </AnimatePresence>
           </Button>
