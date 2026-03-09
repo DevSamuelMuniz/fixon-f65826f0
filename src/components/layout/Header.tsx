@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Search, Info, Mail, MessageCircle, User, LogOut, ThumbsUp, Crown, BookOpen } from 'lucide-react';
+import { Menu, X, Search, Info, Mail, MessageCircle, User, LogOut, ThumbsUp, Crown, BookOpen, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -11,6 +11,7 @@ import { useNiche } from '@/contexts/NicheContext';
 import { NotificationBell } from '@/components/layout/NotificationBell';
 import { useSubscription } from '@/hooks/useSubscription';
 import { toast } from 'sonner';
+import { useTheme } from 'next-themes';
 
 const CONTACT_EMAIL = 'fixon.contato@gmail.com';
 
@@ -19,6 +20,7 @@ export function Header() {
   const { user, profile, signOut } = useAuth();
   const { niche } = useNiche();
   const { isPremium } = useSubscription();
+  const { theme, setTheme } = useTheme();
 
   // Static menu items for navigation
   const menuItems = [
@@ -114,8 +116,29 @@ export function Header() {
           )}
         </nav>
 
-        {/* Right side: Search + Notifications + User + Mobile Menu */}
+        {/* Right side: Search + Theme Toggle + Notifications + User + Mobile Menu */}
         <div className="flex items-center gap-2">
+          {/* Theme Toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="min-h-10 min-w-10 hover:bg-primary/10"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            aria-label="Alternar tema"
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={theme}
+                initial={{ rotate: -90, opacity: 0, scale: 0.8 }}
+                animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                exit={{ rotate: 90, opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.2 }}
+              >
+                {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </motion.div>
+            </AnimatePresence>
+          </Button>
+
           <Link to="/buscar">
             <Button variant="ghost" size="icon" className="min-h-10 min-w-10 hover:bg-primary/10">
               <Search className="h-5 w-5" />
