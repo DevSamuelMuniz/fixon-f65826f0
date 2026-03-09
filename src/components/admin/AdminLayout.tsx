@@ -1,11 +1,12 @@
 import { ReactNode, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, FolderOpen, LogOut, Home, Mail } from 'lucide-react';
+import { LayoutDashboard, FileText, FolderOpen, LogOut, Home, Mail, Sun, Moon } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { Button } from '@/components/ui/button';
 import logo from '@/assets/logo.png';
 import { cn } from '@/lib/utils';
+import { useTheme } from 'next-themes';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -24,6 +25,7 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const unreadCount = useUnreadMessages();
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -60,6 +62,14 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
             </Link>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              aria-label="Alternar tema"
+            >
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
             <Link to="/">
               <Button variant="ghost" size="sm">
                 <Home className="h-4 w-4 mr-2" />
