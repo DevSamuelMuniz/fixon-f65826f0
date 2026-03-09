@@ -20,7 +20,7 @@ export function Header() {
   const { user, profile, signOut } = useAuth();
   const { niche } = useNiche();
   const { isPremium } = useSubscription();
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
 
   // Static menu items for navigation
   const menuItems = [
