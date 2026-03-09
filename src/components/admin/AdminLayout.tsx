@@ -62,6 +62,14 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
             </Link>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              aria-label="Alternar tema"
+            >
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
             <Link to="/">
               <Button variant="ghost" size="sm">
                 <Home className="h-4 w-4 mr-2" />
