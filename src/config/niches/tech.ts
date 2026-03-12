@@ -1,5 +1,5 @@
 import { NicheConfig } from './types';
-import { ADSENSE_PUBLISHER_ID, DEFAULT_AFFILIATE_LINKS } from '../monetization';
+import { DEFAULT_AFFILIATE_LINKS } from '../monetization';
 
 export const techNiche: NicheConfig = {
   id: 'tech',
@@ -21,7 +21,6 @@ export const techNiche: NicheConfig = {
     ogImage: '/og-tech.png',
   },
   monetization: {
-    adsenseId: ADSENSE_PUBLISHER_ID,
     affiliateLinks: {
       ...DEFAULT_AFFILIATE_LINKS,
     },
