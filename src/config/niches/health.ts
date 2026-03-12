@@ -1,5 +1,4 @@
 import { NicheConfig } from './types';
-import { ADSENSE_PUBLISHER_ID } from '../monetization';
 
 export const healthNiche: NicheConfig = {
   id: 'health',
@@ -21,7 +20,6 @@ export const healthNiche: NicheConfig = {
     ogImage: '/og-health.png',
   },
   monetization: {
-    adsenseId: ADSENSE_PUBLISHER_ID,
     affiliateLinks: {
       drogasil: 'https://drogasil.com.br/?ref=fixon-health',
       drogaraia: 'https://drogaraia.com.br/?ref=fixon-health',

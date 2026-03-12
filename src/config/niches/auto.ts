@@ -1,5 +1,4 @@
 import { NicheConfig } from './types';
-import { ADSENSE_PUBLISHER_ID } from '../monetization';
 
 export const autoNiche: NicheConfig = {
   id: 'auto',
@@ -21,7 +20,6 @@ export const autoNiche: NicheConfig = {
     ogImage: '/og-auto.png',
   },
   monetization: {
-    adsenseId: ADSENSE_PUBLISHER_ID,
     affiliateLinks: {
       autozone: 'https://autozone.com.br/?ref=fixon-auto',
       mercadolivre: 'https://mercadolivre.com.br/autopecas?ref=fixon-auto',
